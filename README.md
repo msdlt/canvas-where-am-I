@@ -4,7 +4,7 @@ Theme .js and .css to add within course navigation to Instructure Canvas. Does t
 ## Add Modules sub-menu
 * Sub-menu item takes you to Modules page but hides other Modules
 ![Clicking on Module in menu shows only that Module](https://github.com/msdlt/canvas-where-am-I/blob/master/readme-images/sub-menu-shows-only-selected-module.png)
-* For Pages and other items that are launched via the Modules page, the appropriate sub-Module will be highlighted in the list below Modules
+* For Pages and other items that are launched via the Modules page, the appropriate sub-Module will be highlighted in the list below Modules (note that there is a switch: allowMultilineModuleTitles to specify whether to allow Module titles to wrap)
 ![See containing Module](https://github.com/msdlt/canvas-where-am-I/blob/master/readme-images/sub-menu-shows-module-containing-page.png)
 * Modules takes you to normal Modules view (unless it is the Home page)
 ![Modules works as normal](https://github.com/msdlt/canvas-where-am-I/blob/master/readme-images/modules-shows-normal-modules.png)
