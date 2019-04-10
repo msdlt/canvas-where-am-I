@@ -18,7 +18,6 @@
      * - currently not working on every content type - see notes below
      */
     
-    // TODO Must - progress buttons/bar on Assignments
     // TODO Must - add icons for all itemTypes
     // TODO Must - deal with noOfColumnsPerRow other than 4 - newColumn.className
     // TODO Must - functionise a bit more - a lot of work done in ou_getModules to avoid having multiple for loops steping through Modules/Items
