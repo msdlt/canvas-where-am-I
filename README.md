@@ -39,6 +39,6 @@ I would be grateful for any help you can give with this. Some of the more obviou
 PLease report these as Issues and I will try and sort them out as son as possible
 
 ## Caveat
-This code relies heavily on the ids and classes of various elements in Canvas. As a result it is likley to break when Instructure make changes to the Canvas UI.
+This code relies heavily on the ids and classes of various elements in Canvas. As a result it is likley to break when Instructure make changes to the Canvas UI. I hope I am not being naive in thinking that these should be fairly simple to fix when necessary, particularly with help from others in the lovely Canvas community :)
 
 
