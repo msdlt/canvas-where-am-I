@@ -23,4 +23,4 @@ Theme .js and .css to add within course navigation to Instructure Canvas. Does t
 
 ## Copy Previous and Next buttons from bottom of page to top
 ![Previous and next at top of page](https://github.com/msdlt/canvas-where-am-I/blob/master/readme-images/previous-and-next-buttons-at-top-of-page.png)
-* currently not working on every content type - see notes below
+* currently not working on every content type - see notes in code
