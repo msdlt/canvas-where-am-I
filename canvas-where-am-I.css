@@ -153,7 +153,7 @@ li.ou-progress-item a.active:hover {
 	/*max-width: 262px;*/
 	display: inline-block;
 	vertical-align: top;
-	margin: 0px auto 36px auto;
+	margin: 18px auto 18px auto;
 }
 
 .ou-ModuleCard__header_hero_short {
@@ -201,7 +201,14 @@ div.ou-drop-down-arrow a.al-trigger {
 }
 
 .icon-mini-arrow-down {
+    transform: rotate(0deg);
+    transition: transform 0.2s linear;
     color: var(--ic-brand-font-color-dark);
+}
+
+.icon-mini-arrow-down.open {
+    transform: rotate(180deg);
+    transition: transform 0.2s linear;
 }
 
 .ou-ModuleCard a {
@@ -215,6 +222,29 @@ div.ou-drop-down-arrow a.al-trigger {
 .ou-top_button {
 	margin-left: 10px;
 }
+
+.ou-items-menu {
+    /*display: none;*/
+    padding: 0 18px;
+    background-color: white;
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.2s ease-out;
+}
+
+ul.ou-menu-items-list {
+    list-style: none;
+}
+
+li.ou-menu-item-wrapper a {
+    color: var(--ic-brand-font-color-dark);
+}
+
+/*.ou-items-menu.show {
+    display: block;
+}*/
+
+
 /********************************************************************************
  * END - UoO Styles for cards on Modules page 
 *********************************************************************************/

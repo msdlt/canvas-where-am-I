@@ -1,4 +1,4 @@
-(function () {  //method from: https://community.canvaslms.com/thread/22500-mobile-javascript-development
+/*(function () {  //method from: https://community.canvaslms.com/thread/22500-mobile-javascript-development
     
     // TODO Check that we have added icons for all itemTypes
     // TODO Functionise a bit more - a lot of work done in ou_getModules to avoid having multiple for loops steping through Modules/Items
@@ -59,13 +59,15 @@
             ou_getModules(initCourseId);
         }
     }
+	
+	ou_domReady();
 
     /* 
      * Function to work out when the DOM is ready: https://stackoverflow.com/questions/1795089/how-can-i-detect-dom-ready-and-add-a-class-without-jquery/1795167#1795167 
      * and fire off ou_domReady
      */
     // Mozilla, Opera, Webkit 
-    if ( document.addEventListener ) {
+    /*if ( document.addEventListener ) {
         document.addEventListener( "DOMContentLoaded", function(){
             document.removeEventListener( "DOMContentLoaded", arguments.callee, false);
             ou_domReady();
@@ -79,7 +81,7 @@
                 ou_domReady();
             }
         });
-    }
+    }*/
 
     /*
      * Get modules for courseId
@@ -160,16 +162,18 @@
 
                             var moduleTileArrowButton = document.createElement("a");
                             moduleTileArrowButton.classList.add("al-trigger");
+                            moduleTileArrowButton.setAttribute("menu-to-show", "items-menu-" + module.id);
                             moduleTileArrowButton.href ="#";
 
                             var moduleTileArrowIcon = document.createElement("i");
                             moduleTileArrowIcon.className = "icon-mini-arrow-down";
+                            moduleTileArrowIcon.setAttribute("menu-to-show", "items-menu-" + module.id);
 
                             moduleTileArrowButton.appendChild(moduleTileArrowIcon);
 
                             var moduleTileList = document.createElement("ul");
                             moduleTileList.id = "toolbar-" + module.id + "-0";
-                            moduleTileList.className = "al-options";
+                            moduleTileList.className = "ou-menu-items-list";
                             moduleTileList.setAttribute("role", "menu");
                             moduleTileList.tabIndex = 0;
                             moduleTileList.setAttribute("aria-hidden",true);
@@ -263,7 +267,13 @@
                         if(showItemLinks && module.items.length > 0) {
                             //only add actions if required
                             moduleTileActions.appendChild(moduleTileArrowButton);
-                            moduleTileActions.appendChild(moduleTileList);
+                            
+                            var rowForItems = document.createElement("div");
+                            rowForItems.className = "grid-row center-sm ou-items-menu";
+                            rowForItems.id = "items-menu-" + module.id;
+                            ou_insertAfter(rowForItems, newRow);
+                            rowForItems.appendChild(moduleTileList);
+                            //moduleTileActions.appendChild(moduleTileList);
                             moduleTileContent.appendChild(moduleTileActions);
                             //console.log('adding actions');
                         } else {
@@ -314,6 +324,48 @@
             
                 //now add Progress Bar
                 var spoof = setTimeout(ou_showProgressBar, 100); //timeout to ensure all elements have really loaded before running
+
+                //click event listener for module tile buttons
+                document.addEventListener('click', function (event) {
+                    // If the clicked element isn't a button which shows a menu
+                    if (!event.target.getAttribute("menu-to-show")) return;
+                    // Don't follow the link
+                    event.preventDefault();
+                    var menuToShow = document.getElementById(event.target.getAttribute("menu-to-show"));
+                    if (menuToShow.style.maxHeight){
+                        menuToShow.style.maxHeight = null;
+                        console.log(event.target.tagName);
+                        if(event.target.tagName === "I") {
+                            event.target.classList.remove("open");
+                        } else if(event.target.tagName === "A") {
+                            event.target.children[0].classList.remove("open"); 
+                        }
+                        
+                    } else {
+                        //before we show this one, make sure all the others are closed
+                        var itemsMenus = document.getElementsByClassName("ou-items-menu");
+                        Array.prototype.forEach.call(itemsMenus, function(itemsMenu, index) {
+                            if (itemsMenu.style.maxHeight){
+                                itemsMenu.style.maxHeight = null;     
+                            }   
+                        });
+                        var menuButtons = document.getElementsByClassName("icon-mini-arrow-down");
+                        Array.prototype.forEach.call(menuButtons, function(menuButton, index) {
+                            menuButton.classList.remove("open");
+                        });
+                        menuToShow.style.maxHeight = menuToShow.scrollHeight + "px";
+                        if(event.target.tagName === "I") {
+                            event.target.classList.add("open");
+                        } else if(event.target.tagName === "A") {
+                            event.target.children[0].classList.add("open"); 
+                        }
+                        //event.target.classList.add("open");
+                    } 
+                                
+                }, false);
+
+
+
             })
             .catch(function(error) {
                 console.log('ou_getModules request failed', error);
@@ -441,16 +493,16 @@
              * - External tool = no header - could add immedioately below div#content
              */
             
-            if(previousButtonTop) {
+            /*if(previousButtonTop) {
                 var divHeaderLefts = document.getElementsByClassName('header-left-flex'); //this is the left header element for Pages
                 if(divHeaderLefts.length > 0) {
                     var divHeaderLeft = divHeaderLefts[0];
                     divHeaderLeft.insertBefore(previousButtonTop, divHeaderLeft.firstChild); 
                 } else {
-                    /*var discussionManageBar = document.getElementById('discussion-managebar');
-                    if(discussionManageBar) {
+                    //var discussionManageBar = document.getElementById('discussion-managebar');
+                    //if(discussionManageBar) {
                         //we should be in a discussion
-                    }*/
+                    }
                 }
             }
             if(nextButtonTop) {
@@ -460,18 +512,17 @@
                     //divHeaderRight.insertBefore(nextButtonTop, divHeaderRight.firstChild);
                     divHeaderRight.appendChild(nextButtonTop);
                 } else {
-                    /*var discussionManageBar = document.getElementById('discussion-managebar');
-                    if(discussionManageBar) {
+                    //var discussionManageBar = document.getElementById('discussion-managebar');
+                    //if(discussionManageBar) {
                         //we should be in a discussion
-                    }*/
+                    //}
                 }
-            }
+            }*/
             
             
         }    
     }
 
-    
     /* Utility functions */
     /*
      * Function which returns a promise (and error if rejected) if response status is OK
@@ -615,4 +666,4 @@
      *************************************************************/
     
     
-})();
+/*})();*/
