@@ -22,7 +22,7 @@
         '#a79d96','#be0f34','#001c3d','#ac48bf',
         '#9c4700','#c7302b','#ebc4cb','#1daced'
     ];
-    var showItemLinks = 1; //whether or not to show drop-down links to items within Modules in tiles
+    //var showItemLinks = 1; //whether or not to show drop-down links to items within Modules in tiles NOTE: Currently disabled - need to read this: https://www.w3.org/WAI/tutorials/menus/application-menus-code/ for how to do it accessibly
     var widthOfButton = 42;  //width of a Progress bar button //TODO - calculate this
     var widthOfCentreColPadding = 72; //used to calculate whether enough room to show Progress bar buttons //TODO - calculate this
     var widthOfPositionWords = 134; //used to calculate whether enough room to show Progress bar buttons //TODO - calculate this
@@ -60,7 +60,8 @@
         }
     }
 	
-	ou_domReady();
+    ou_domReady();
+    
 
     /* 
      * Function to work out when the DOM is ready: https://stackoverflow.com/questions/1795089/how-can-i-detect-dom-ready-and-add-a-class-without-jquery/1795167#1795167 
@@ -154,7 +155,7 @@
                         var moduleTileContent = document.createElement("div");
                         moduleTileContent.className = "ou-ModuleCard__header_content";
                        
-                        if(showItemLinks && module.items.length > 0) {
+                        /*if(showItemLinks && module.items.length > 0) {
                             //don't add drop-down if not showItemLinks or if no items in Module
                             var moduleTileActions = document.createElement("div");
                             moduleTileActions.className = "ou-drop-down-arrow";
@@ -179,7 +180,7 @@
                             moduleTileList.setAttribute("aria-hidden",true);
                             moduleTileList.setAttribute("aria-expanded",false);
                             moduleTileList.setAttribute("aria-activedescendant","toolbar-" + module.id + "-1");
-                        }
+                        }*/
                     }
                     moduleItemsForProgress[module.id] = []
                     //If we're on a page launched via Modules, initModuleItemId != 0 so or if we have launched the whole Modules page (ie need menu at top)
@@ -187,12 +188,12 @@
                         module.items.forEach(function(item, iindex){
                             if(item.type !== "SubHeader") { //don't want these represented anywhere - on Modules tiles dropdowns OR in progress buttons
                                 //TODO factor in the number of Text Headers before calculating % complete
-                                var progressAsPercentage = Math.round(((iindex+1)/module.items.length)*100);
+                                //var progressAsPercentage = Math.round(((iindex+1)/module.items.length)*100);
                                 
                                 var tempObj = {
                                     moduleId: item.module_id, 
-                                    moduleName: module.name, 
-                                    progress: progressAsPercentage    
+                                    moduleName: module.name/*, 
+                                    progress: progressAsPercentage */   
                                 }
 
                                 moduleIdByModuleItemId[parseInt(item.id)] = tempObj; //for deciding which sub-module on lh menu is active
@@ -228,7 +229,7 @@
 
                                 var listItemDest = '/courses/' + initCourseId + '/modules/items/' + itemId;
 
-                                var listItemLink = document.createElement("a");
+                                /*var listItemLink = document.createElement("a");
                                 listItemLink.className = iconType;
                                 listItemLink.href = listItemDest;
                                 listItemLink.text = itemTitle;
@@ -236,11 +237,11 @@
                                 listItemLink.setAttribute("role", "menuitem");
                                 listItemLink.title = itemTitle;
 
-                                listItem.appendChild(listItemLink);
+                                listItem.appendChild(listItemLink);*/
 
-                                if(divContextModulesContainer && showItemLinks) {
+                                /*if(divContextModulesContainer && showItemLinks) {
                                     moduleTileList.appendChild(listItem);    
-                                } else {
+                                } else {*/
                                     //note only want to do this for current module
                                     var isCurrentItem = parseInt(initModuleItemId) == parseInt(item.id);
                                     var tempNavObj = {
@@ -250,7 +251,7 @@
                                         current: isCurrentItem
                                     }
                                     moduleItemsForProgress[module.id][iindex] = tempNavObj;
-                                }
+                                /* } */
                             }
                         });
                     }
@@ -264,7 +265,7 @@
                         moduleTileTitle.style.color = moduleColours[mindex];
                         moduleTileTitle.innerHTML = module.name; 
 
-                        if(showItemLinks && module.items.length > 0) {
+                        /*if(showItemLinks && module.items.length > 0) {
                             //only add actions if required
                             moduleTileActions.appendChild(moduleTileArrowButton);
                             
@@ -276,10 +277,10 @@
                             //moduleTileActions.appendChild(moduleTileList);
                             moduleTileContent.appendChild(moduleTileActions);
                             //console.log('adding actions');
-                        } else {
+                        } else {*/
                             //only leave space for actions if we're adding them
                             moduleTileTitle.classList.add("ou-no-actions");  
-                        }
+                        /*}*/
 
                         moduleTileContent.appendChild(moduleTileTitle);
                         moduleTileLink.appendChild(moduleTileHeader);
@@ -326,45 +327,25 @@
                 var spoof = setTimeout(ou_showProgressBar, 100); //timeout to ensure all elements have really loaded before running
 
                 //click event listener for module tile buttons
-                document.addEventListener('click', function (event) {
-                    // If the clicked element isn't a button which shows a menu
+                /*document.addEventListener('click', function (event) {
                     if (!event.target.getAttribute("menu-to-show")) return;
                     // Don't follow the link
-                    event.preventDefault();
-                    var menuToShow = document.getElementById(event.target.getAttribute("menu-to-show"));
-                    if (menuToShow.style.maxHeight){
-                        menuToShow.style.maxHeight = null;
-                        console.log(event.target.tagName);
-                        if(event.target.tagName === "I") {
-                            event.target.classList.remove("open");
-                        } else if(event.target.tagName === "A") {
-                            event.target.children[0].classList.remove("open"); 
-                        }
-                        
-                    } else {
-                        //before we show this one, make sure all the others are closed
-                        var itemsMenus = document.getElementsByClassName("ou-items-menu");
-                        Array.prototype.forEach.call(itemsMenus, function(itemsMenu, index) {
-                            if (itemsMenu.style.maxHeight){
-                                itemsMenu.style.maxHeight = null;     
-                            }   
-                        });
-                        var menuButtons = document.getElementsByClassName("icon-mini-arrow-down");
-                        Array.prototype.forEach.call(menuButtons, function(menuButton, index) {
-                            menuButton.classList.remove("open");
-                        });
-                        menuToShow.style.maxHeight = menuToShow.scrollHeight + "px";
-                        if(event.target.tagName === "I") {
-                            event.target.classList.add("open");
-                        } else if(event.target.tagName === "A") {
-                            event.target.children[0].classList.add("open"); 
-                        }
-                        //event.target.classList.add("open");
-                    } 
+                    event.preventDefault(); 
+                    ou_handleArrowPress(event.target);   
                                 
                 }, false);
 
-
+                document.addEventListener('keydown', function (event) {
+                    if (event.target.getAttribute("menu-to-show")) {
+                        if (event.keyCode == 13 || event.keyCode == 32 || event.keyCode == 38 || event.keyCode == 40) {
+                            //console.log(event.target.tagName);
+                            event.preventDefault();
+                            event.stopPropagation();
+                            ou_handleArrowPress(event.target);  
+                            return false; 
+                        }
+                    }
+                }, false);*/
 
             })
             .catch(function(error) {
@@ -372,6 +353,41 @@
             }
         );
     }
+
+    /*function ou_handleArrowPress(clickee) {
+        // If the clicked element isn't a button which shows a menu
+        
+        var menuToShow = document.getElementById(clickee.getAttribute("menu-to-show"));
+        if (menuToShow.style.maxHeight){
+            menuToShow.style.maxHeight = null;
+            console.log(clickee.tagName);
+            if(clickee.tagName === "I") {
+                clickee.classList.remove("open");
+            } else if(clickee.tagName === "A") {
+                clickee.children[0].classList.remove("open"); 
+            }
+            
+        } else {
+            //before we show this one, make sure all the others are closed
+            var itemsMenus = document.getElementsByClassName("ou-items-menu");
+            Array.prototype.forEach.call(itemsMenus, function(itemsMenu, index) {
+                if (itemsMenu.style.maxHeight){
+                    itemsMenu.style.maxHeight = null;     
+                }   
+            });
+            var menuButtons = document.getElementsByClassName("icon-mini-arrow-down");
+            Array.prototype.forEach.call(menuButtons, function(menuButton, index) {
+                menuButton.classList.remove("open");
+            });
+            menuToShow.style.maxHeight = menuToShow.scrollHeight + "px";
+            if(clickee.tagName === "I") {
+                clickee.classList.add("open");
+            } else if(clickee.tagName === "A") {
+                clickee.children[0].classList.add("open"); 
+            }
+            //event.target.classList.add("open");
+        } 
+    }*/
     
     /*
      * Function which shows progress bar between Next and Previous buttons IF item shown as part of Module
@@ -396,43 +412,7 @@
             progressBarContainer.appendChild(divProgRightCol);
             
             //Progress bar itself
-            //create individual progress buttons version
-            divProgressIcons = document.createElement("div");
-            divProgressIcons.className = 'ou-progress-icons';
-            divProgressItems = document.createElement("ul");
-            divProgressItems.className = 'ou-progress-items';
-            moduleItemsForProgress[moduleIdByModuleItemId[initModuleItemId].moduleId].forEach(function(item, index) {
-                var listItem = document.createElement('li');
-                listItem.className = 'ou-progress-item';
-                var listItemLink = document.createElement("a");
-                listItemLink.classList.add(item.icon);
-                if(item.current) {
-                    listItemLink.classList.add("active");    
-                }
-                listItemLink.href = item.href;
-                listItemLink.setAttribute("role", "menuitem");
-                listItemLink.title = item.title;
-                listItem.appendChild(listItemLink);  
-                divProgressItems.appendChild(listItem);
-            });
-            divProgressIcons.appendChild(divProgressItems);
-                        
-            //create bar version
-            var divProgressBar = document.createElement("div");
-            divProgressBar.classList.add("ou-ProgressBar");
-            divProgressBar.setAttribute('aria-valuemax', 100);
-            divProgressBar.setAttribute('aria-valuemin', 0);
-            divProgressBar.setAttribute('aria-valuenow', moduleIdByModuleItemId[initModuleItemId].progress);
-            var divProgressBarBar = document.createElement("div");
-            divProgressBarBar.classList.add("ou-ProgressBarBar");
-            divProgressBarBar.style.width = moduleIdByModuleItemId[initModuleItemId].progress +'%';
-            divProgressBar.setAttribute('title', 'Position in: ' + moduleIdByModuleItemId[initModuleItemId].moduleName + ' = ' + moduleIdByModuleItemId[initModuleItemId].progress +'%');
-            //divProgressBar.setAttribute('data-html-tooltip-title', moduleIdByModuleItemId[initModuleItemId].moduleName + ': ' + moduleIdByModuleItemId[initModuleItemId].progress +'%');
-            divProgressBar.appendChild(divProgressBarBar);
-            //Wording
-            var divProgressLabel = document.createElement("div");
-            divProgressLabel.textContent = 'Position in module: '
-                     
+
             //Now create flexible divs to pop progress bar and next and previous buttons into
             //1. Ceate div with one flexible and two inflexible divs at either end
             var divColContainer = document.createElement("div");
@@ -447,37 +427,98 @@
             divColContainer.appendChild(divLeftCol);
             divColContainer.appendChild(divCentreCol);
             divColContainer.appendChild(divRightCol);
+            //3. Place new progressBarContainer in the middle flexible div
+            divFooterContent.appendChild(divColContainer);
+            
+            //first work out whether have enough room for the progress buttons - if not, show bar
+            var progressIconsLarge = true;
+            if((moduleItemsForProgress[moduleIdByModuleItemId[initModuleItemId].moduleId].length * widthOfButton) > (divCentreCol.offsetWidth-widthOfCentreColPadding)) {
+                progressIconsLarge = false;
+            }
+
+            //create individual progress buttons version
+            divProgressIcons = document.createElement("div");
+            divProgressIcons.className = 'ou-progress-icons';
+            var noOfItems = moduleItemsForProgress[moduleIdByModuleItemId[initModuleItemId].moduleId].length;
+            divProgressItems = document.createElement("ul");
+            //if (progressIconsLarge) {
+                divProgressItems.className = 'ou-progress-items';
+            //} else {
+            //    divProgressItems.className = 'ou-progress-items small';
+            //}
+            
+            moduleItemsForProgress[moduleIdByModuleItemId[initModuleItemId].moduleId].forEach(function(item, index) {
+                var listItem = document.createElement('li');
+                var listItemLink = document.createElement("a");
+                if (progressIconsLarge) {
+                    listItem.className = 'ou-progress-item';
+                    listItemLink.classList.add(item.icon);                    
+                } else {
+                    listItem.className = 'ou-progress-item small';
+                    //calculate % size
+                    var itemWidth = (divCentreCol.offsetWidth-widthOfCentreColPadding)/noOfItems;
+                    if (itemWidth > 30) { //keeps it sqaure
+                        itemWidth = 30;
+                    }
+                    listItem.style.width = itemWidth + 'px';
+                    //listItemLink.classList.add(item.icon);  
+                }
+                if(item.current) {
+                    listItemLink.classList.add("active");    
+                }
+                listItemLink.href = item.href;
+                listItemLink.setAttribute("role", "menuitem");
+                listItemLink.title = item.title;
+                listItem.appendChild(listItemLink);  
+                divProgressItems.appendChild(listItem);
+            });
+            divProgressIcons.appendChild(divProgressItems);
+                        
+            //create bar version
+            /*var divProgressBar = document.createElement("div");
+            divProgressBar.classList.add("ou-ProgressBar");
+            divProgressBar.setAttribute('aria-valuemax', 100);
+            divProgressBar.setAttribute('aria-valuemin', 0);
+            divProgressBar.setAttribute('aria-valuenow', moduleIdByModuleItemId[initModuleItemId].progress);
+            var divProgressBarBar = document.createElement("div");
+            divProgressBarBar.classList.add("ou-ProgressBarBar");
+            divProgressBarBar.style.width = moduleIdByModuleItemId[initModuleItemId].progress +'%';
+            divProgressBar.setAttribute('title', 'Position in: ' + moduleIdByModuleItemId[initModuleItemId].moduleName + ' = ' + moduleIdByModuleItemId[initModuleItemId].progress +'%');
+            //divProgressBar.setAttribute('data-html-tooltip-title', moduleIdByModuleItemId[initModuleItemId].moduleName + ': ' + moduleIdByModuleItemId[initModuleItemId].progress +'%');
+            divProgressBar.appendChild(divProgressBarBar);
+            //Wording
+            var divProgressLabel = document.createElement("div");
+            divProgressLabel.textContent = 'Position in module: '*/
+                     
+            
             //look for Previous button
             var previousButton = document.querySelector('a.module-sequence-footer-button--previous');
-            var previousButtonTop;
+            //var previousButtonTop;  //disabled at the moment as Canvas had very non-standard headers
             if(previousButton) {
                 divLeftCol.appendChild(previousButton);
-                previousButtonTop = previousButton.cloneNode(true);
-                previousButtonTop.classList.add("ou-PreviousTop"); //make space on right
+                /*previousButtonTop = previousButton.cloneNode(true);
+                previousButtonTop.classList.add("ou-PreviousTop"); //make space on right*/
             }
             //look for Next button
             var nextButton = document.querySelector('span.module-sequence-footer-button--next');
-            var nextButtonTop;
+            //var nextButtonTop; //disabled at the moment as Canvas had very non-standard headers
             if(nextButton) {
                 divRightCol.appendChild(nextButton);
-                nextButtonTop = nextButton.cloneNode(true);
-                nextButtonTop.classList.add("ou-NextTop"); //make space on right
+                //nextButtonTop = nextButton.cloneNode(true);
+                //nextButtonTop.classList.add("ou-NextTop"); //make space on right
             }
-            //3. Place new progressBarContainer in the middle flexible div
-            divFooterContent.appendChild(divColContainer);
-            console.log(divFooterContent);
+            
             //Now work out whether have enough room for the progress buttons - if not, show bar
-            console.log(moduleItemsForProgress[moduleIdByModuleItemId[initModuleItemId].moduleId].length + ', ' + widthOfButton + ', ' + divCentreCol.offsetWidth);
-            if((moduleItemsForProgress[moduleIdByModuleItemId[initModuleItemId].moduleId].length * widthOfButton) < (divCentreCol.offsetWidth-widthOfCentreColPadding)) {
+            //if((moduleItemsForProgress[moduleIdByModuleItemId[initModuleItemId].moduleId].length * widthOfButton) < (divCentreCol.offsetWidth-widthOfCentreColPadding)) {
                 divCentreCol.appendChild(divProgressIcons);
-            } else {
+            /*} else {
                 if((widthOfPositionWords * 2) < (divCentreCol.offsetWidth-widthOfCentreColPadding)) {
                     //only show label if enough room - ie > 2 x width of label
                     divProgLeftCol.appendChild(divProgressLabel);
                 }
                 divProgRightCol.appendChild(divProgressBar);
                 divCentreCol.appendChild(progressBarContainer);
-            }
+            }*/
             
             /* 
              * Cloning prevous and next and adding to appropriate parts of header
