@@ -28,9 +28,10 @@ a.ou-section-link-sub:hover, a.ou-section-link-sub:focus {
 }
 
 a.ou-section-link-sub.active{
-    background-color:var(--ic-brand-primary);
-    font-weight:bold;
-    color:#fff
+    /*background-color:var(--ic-brand-primary);*/
+    /*font-weight:bold;
+    color:#fff*/
+    padding-left: 22px;
 }
 a.ou-section-link-sub.active:focus{
     outline-offset:.0625rem;
