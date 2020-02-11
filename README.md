@@ -35,6 +35,27 @@ You'll need admin rights in a subaccount to be able to upload the canvas-where-a
 # Contributing
 I would be grateful for any help you can give with this. Some of the more obvious enhancements are in the 'Issues' for this repository. As well as these issues, there are some TODOs at the top of canvas-where-am-I.js.
 
+# Development
+If you are wanting to work on this script there are some supporting files that make development faster. To set this up you first need to install [npm](https://www.npmjs.com/get-npm) and [mkcert](https://github.com/FiloSottile/mkcert). Once installed run the initial setup of `mkcert`:
+
+    mkcert -install
+
+This will install a trusted root certificate which will mean your browser can load files from a local webserver over HTTPS without forcing you to accept the untrusted certificate first.
+
+The next step is to generate a certificate to use with:
+
+    mkcert localhost
+
+Then install all the `npm` dependencies with:
+
+    npm install
+
+Then startup the local webserver that will response to requests.
+
+    npm run start
+
+There is then a file, [development.js](./development.js) that should be added to your theme as a JavaScript file which will dynamically add JS/CSS from your local webserver to Canvas. 
+
 # Problems
 Please report these as Issues and I will try and sort them out as soon as possible
 

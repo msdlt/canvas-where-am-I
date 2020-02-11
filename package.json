@@ -1,0 +1,22 @@
+{
+  "name": "canvas-where-am-i",
+  "version": "1.0.0",
+  "description": "Theme .js and .css to add within course navigation to Instructure Canvas on the web",
+  "main": "canvas-where-am-I.js",
+  "scripts": {
+    "start": "http-server -p 3000 -S -C localhost.pem -K localhost-key.pem"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/msdlt/canvas-where-am-I.git"
+  },
+  "author": "",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/msdlt/canvas-where-am-I/issues"
+  },
+  "homepage": "https://github.com/msdlt/canvas-where-am-I#readme",
+  "devDependencies": {
+    "http-server": "^0.11.1"
+  }
+}
