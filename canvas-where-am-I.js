@@ -88,13 +88,11 @@
      * Get modules for courseId
      */
     function ou_getModules(courseId) {
-        var csrfToken = ou_getCsrfToken();
         fetch('/api/v1/courses/' + courseId + '/modules?include=items&per_page=100',{  //Added &per_page=100, otherwise only returns the first 10
                 method: 'GET',
                 credentials: 'include',
                 headers: {
                     "Accept": "application/json",
-                    "X-CSRF-Token": csrfToken
                 }
             })
             .then(ou_status)
@@ -585,23 +583,7 @@
     function ou_json(response) {
         return response.json();
     }
-    /*
-     * Function which returns csrf_token from cookie see: https://community.canvaslms.com/thread/22500-mobile-javascript-development
-     * @returns {string} csrf token
      */
-    function ou_getCsrfToken() {
-        var csrfRegex = new RegExp('^_csrf_token=(.*)$');
-        var csrf;
-        var cookies = document.cookie.split(';');
-        for (var i = 0; i < cookies.length; i++) {
-            var cookie = cookies[i].trim();
-            var match = csrfRegex.exec(cookie);
-            if (match) {
-                csrf = decodeURIComponent(match[1]);
-                break;
-            }
-        }
-        return csrf;
     }
 
     /**
@@ -678,13 +660,11 @@
      * Get self id - actually only needed to show completion - NOT CURRENTLY USED
      */
     function ou_getSelfThenModules() {
-        var csrfToken = ou_getCsrfToken();
         fetch('/api/v1/users/self',{
                 method: 'GET',
                 credentials: 'include',
                 headers: {
                     "Accept": "application/json",
-                    "X-CSRF-Token": csrfToken
                 }
             })
             .then(ou_status)
