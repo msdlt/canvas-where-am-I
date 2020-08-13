@@ -28,9 +28,10 @@ a.ou-section-link-sub:hover, a.ou-section-link-sub:focus {
 }
 
 a.ou-section-link-sub.active{
-    background-color:var(--ic-brand-primary);
-    font-weight:bold;
-    color:#fff
+    /*background-color:var(--ic-brand-primary);*/
+    /*font-weight:bold;
+    color:#fff*/
+    padding-left: 22px;
 }
 a.ou-section-link-sub.active:focus{
     outline-offset:.0625rem;
@@ -114,6 +115,10 @@ li.ou-progress-item {
     margin-left: 6px;
 }
 
+li.ou-progress-item.small {
+    margin-left: 0px;
+}
+
 li.ou-progress-item a {
     color: var(--ic-brand-font-color-dark-lightened-30);
     background-color: #f5f5f5;;
@@ -124,6 +129,16 @@ li.ou-progress-item a {
     border: 1px solid;
     border-color: #C7CDD1;
     border-radius: 50%;
+}
+li.ou-progress-item.small a {
+    color: var(--ic-brand-font-color-dark-lightened-30);
+    background-color: #f5f5f5;;
+    width: 100%;
+    height: 30px;
+    padding: 0px;
+    border: 1px solid;
+    border-color : rgba(199, 205, 209, 1);
+    border-radius: 0%;
 }
 li.ou-progress-item a:hover {
     background-color: #e8e8e8;
@@ -153,7 +168,7 @@ li.ou-progress-item a.active:hover {
 	/*max-width: 262px;*/
 	display: inline-block;
 	vertical-align: top;
-	margin: 0px auto 36px auto;
+	margin: 18px auto 18px auto;
 }
 
 .ou-ModuleCard__header_hero_short {
@@ -201,7 +216,14 @@ div.ou-drop-down-arrow a.al-trigger {
 }
 
 .icon-mini-arrow-down {
+    transform: rotate(0deg);
+    transition: transform 0.2s linear;
     color: var(--ic-brand-font-color-dark);
+}
+
+.icon-mini-arrow-down.open {
+    transform: rotate(180deg);
+    transition: transform 0.2s linear;
 }
 
 .ou-ModuleCard a {
@@ -215,6 +237,29 @@ div.ou-drop-down-arrow a.al-trigger {
 .ou-top_button {
 	margin-left: 10px;
 }
+
+.ou-items-menu {
+    /*display: none;*/
+    padding: 0 18px;
+    background-color: white;
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.2s ease-out;
+}
+
+ul.ou-menu-items-list {
+    list-style: none;
+}
+
+li.ou-menu-item-wrapper a {
+    color: var(--ic-brand-font-color-dark);
+}
+
+/*.ou-items-menu.show {
+    display: block;
+}*/
+
+
 /********************************************************************************
  * END - UoO Styles for cards on Modules page 
 *********************************************************************************/
