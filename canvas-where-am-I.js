@@ -32,8 +32,9 @@
     var divCourseHomeContent = document.getElementById('course_home_content');  //is this page Home
     var divContent = document.getElementById('content');
     var divContextModulesContainer = document.getElementById('context_modules_sortable_container');  //are we on the Modules page
+    //var aModules = document.querySelector('li.section a[class="modules"]'); //retutrns breadcrumbs AND lh Nav
     // This doesn't match if the modules page is hidden
-    var aModules = document.querySelector('li.section a[title="Modules"]'); //retutrns breadcrumbs AND lh Nav
+    var aModules = Array.from(document.querySelectorAll('li.section a')).find(el => el.textContent === 'Modules'); //see: https://stackoverflow.com/questions/37098405/javascript-queryselector-find-div-by-innertext
     
     /* Global bvariables */
     var moduleNav;
