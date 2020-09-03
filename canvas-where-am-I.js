@@ -1,5 +1,5 @@
-/*(function () {  //method from: https://community.canvaslms.com/thread/22500-mobile-javascript-development
-    
+(function () {  //method from: https://community.canvaslms.com/thread/22500-mobile-javascript-development
+
     // TODO Check that we have added icons for all itemTypes
     // TODO Functionise a bit more - a lot of work done in ou_getModules to avoid having multiple for loops steping through Modules/Items
     // TODO Check that we haven't lost any of Canvas's accessibility features
@@ -32,6 +32,7 @@
     var divCourseHomeContent = document.getElementById('course_home_content');  //is this page Home
     var divContent = document.getElementById('content');
     var divContextModulesContainer = document.getElementById('context_modules_sortable_container');  //are we on the Modules page
+    // This doesn't match if the modules page is hidden
     var aModules = document.querySelector('li.section a[title="Modules"]'); //retutrns breadcrumbs AND lh Nav
     
     /* Global bvariables */
@@ -42,6 +43,7 @@
     var moduleIdByModuleItemId = [] //used to store moduleIds using the ModuleItemId (as shown in url for pages, etc) so we can show active sub-modules {moduleId: x, moduleName: x, progress: x}
     var moduleItemsForProgress = []  //used to store details of module items so can show as dots, if enough space, at bottom of page {href: string, title: string: icon: string, current: bool} - keyed first by module
     var initCourseId = ou_getCourseId();  //which course are we in ONLY WORKS ON WEB
+    var initDomainId = ou_getDomainRootAccountId(); // The domain ID.
     var initModuleItemId = ou_getModuleItemId();  //0 or module_item_id from URL (ie only if launched through Modules) 
     var initModuleId = ou_getModuleId();  //0 or module being viewed within Modules page
 
@@ -60,14 +62,34 @@
         }
     }
 	
-    ou_domReady();
+    // ou_domReady();
+
+    function ou_CheckSettings () {
+        if (initDomainId && initCourseId) {
+            fetch("https://oxctl-modules.s3-eu-west-1.amazonaws.com/" + initDomainId + "/" + initCourseId + ".json")
+              .then(ou_json)
+              .then(function(json) {
+                  if (json["modules-navigation"]) {
+                      console.log("Modules Navigation: enabled");
+                      ou_domReady();
+                  } else {
+                      console.log("Modules Navigation: disabled");
+                  }
+              })
+              .catch(function(error) {
+                  console.log("Failed to load settings");
+              });
+
+        }
+    }
+    ou_CheckSettings();
     
 
-    /* 
-     * Function to work out when the DOM is ready: https://stackoverflow.com/questions/1795089/how-can-i-detect-dom-ready-and-add-a-class-without-jquery/1795167#1795167 
+    /*
+     * Function to work out when the DOM is ready: https://stackoverflow.com/questions/1795089/how-can-i-detect-dom-ready-and-add-a-class-without-jquery/1795167#1795167
      * and fire off ou_domReady
      */
-    // Mozilla, Opera, Webkit 
+    // Mozilla, Opera, Webkit
     /*if ( document.addEventListener ) {
         document.addEventListener( "DOMContentLoaded", function(){
             document.removeEventListener( "DOMContentLoaded", arguments.callee, false);
@@ -583,7 +605,13 @@
     function ou_json(response) {
         return response.json();
     }
+
+    /**
+     * Gets the domain root account ID.
      */
+    function ou_getDomainRootAccountId() {
+        var id = ENV.DOMAIN_ROOT_ACCOUNT_ID;
+        return id;
     }
 
     /**
@@ -687,4 +715,4 @@
      *************************************************************/
     
     
-/*})();*/
+})();

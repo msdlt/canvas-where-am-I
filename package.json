@@ -2,10 +2,10 @@
   "name": "canvas-where-am-i",
   "version": "1.0.0",
   "description": "Theme .js and .css to add within course navigation to Instructure Canvas on the web",
-  "main": "canvas-where-am-I.js",
+  "main": "",
   "scripts": {
     "test": "jest",
-    "start": "http-server -p 3000 -S -C localhost.pem -K localhost-key.pem"
+    "start": "http-server -p 3001 -S -C localhost.pem -K localhost-key.pem"
   },
   "repository": {
     "type": "git",
@@ -19,11 +19,12 @@
   "homepage": "https://github.com/msdlt/canvas-where-am-I#readme",
   "devDependencies": {
     "axios": "^0.19.0",
+    "cypress": "^3.8.1",
     "dotenv": "^8.2.0",
     "http-server": "^0.11.1",
     "jest": "^24.9.0",
-    "jest-puppeteer": "^4.3.0",
-    "puppeteer": "^2.0.0"
+    "jest-puppeteer": "^4.4.0",
+    "puppeteer": "^2.1.1"
   },
   "jest": {
     "preset": "jest-puppeteer"

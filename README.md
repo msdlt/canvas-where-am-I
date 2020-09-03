@@ -59,6 +59,32 @@ There is then a file, [development.js](./development.js) that should be added to
 # Problems
 Please report these as Issues and I will try and sort them out as soon as possible
 
+# Testing
+
+To get lots more debugging information when doing tests run with the `DEBUG` environmental variable set:
+
+DEBUG="puppeteer:*" jest
+
+We were having problems with clicking on elements before the DOM has had it's jQuery handlers attached and although there is code to handle these early clicks they don't handle some element types.
+The fix of just waiting for jQuery to add handlers is good enough although not ideal.
+
+_earlyClick is the function handling this:
+
+https://github.com/instructure/canvas-lms/blob/master/app/views/layouts/_head.html.erb
+https://github.com/instructure/canvas-lms/blob/master/public/javascripts/instructure.js
+
+It would be useful if there was an event generated when Canvas had set it's page up correctly. It doesn't look like there's an object we can watch for changes.
+
+## Fixing the Mac OS warning on Chrome
+
+https://github.com/puppeteer/puppeteer/issues/4752#issuecomment-557199601
+
+## Timing on tests
+
+I am getting some stalls of just over 60 seconds when using puppeteer, Chrome appears to retry so just upping the test timeout appears to cover these cases.
+
+I've also had the `expect(page).toFill('selector', 'value')` not work reliably, sometimes it enters the values, sometimes it only types some of them. Slowing down the whole script was the simple way to fix this issue.  
+
 # Caveat
 This code relies heavily on the ids and classes of various elements in Canvas. As a result it is likley to break when Instructure make changes to the Canvas UI. I hope I am not being naive in thinking that these should be fairly simple to fix when necessary, particularly with help from others in the lovely Canvas community :)
 
