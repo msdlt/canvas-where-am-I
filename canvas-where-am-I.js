@@ -1,12 +1,17 @@
+/**** TODO LIST ****/
+// TODO Check that we have added icons for all itemTypes
+// TODO Functionise a bit more - a lot of work done in ou_getModules to avoid having multiple for loops steping through Modules/Items
+// TODO Check that we haven't lost any of Canvas's accessibility features
+// TODO investigate whether we could limit Module titles in LH menu to e.g two lines
+// TODO can we refresh menu when editing Modules?
+
 (function () {  //method from: https://community.canvaslms.com/thread/22500-mobile-javascript-development
 
-    // TODO Check that we have added icons for all itemTypes
-    // TODO Functionise a bit more - a lot of work done in ou_getModules to avoid having multiple for loops steping through Modules/Items
-    // TODO Check that we haven't lost any of Canvas's accessibility features
-    // TODO investigate whether we could limit Module titles in LH menu to e.g two lines
-    // TODO can we refresh menu when editing Modules?
+    /**** Start of Configuration Section ****/
 
-    /* Configurable variables */
+    /* Amazon S3 bucket URL, this URL is needed to retrieve the course presentation and navigation settings */
+    const amazonS3bucketUrl = `https://oxctl-modules.s3-eu-west-1.amazonaws.com/`
+
     var noOfColumnsPerRow = 4;  //no of columns per row of tiles at top of Modules page - 1, 2, 3, 4, 6 or 12 - ONLY USE 4 for the moment
     /* colours for Module tiles mostly randomly selected from: https://www.ox.ac.uk/public-affairs/style-guide/digital-style-guide */
     var moduleColours = [
@@ -50,6 +55,8 @@
     var initModuleItemId = ou_getModuleItemId();  //0 or module_item_id from URL (ie only if launched through Modules)
     var initModuleId = ou_getModuleId();  //0 or module being viewed within Modules page
 
+    /**** End of Configuration Section ******/
+
     /* Wait until DOM ready before processing */
     function ou_domReady () {
         //New LH menu navigation - show on ALL pages in course
@@ -69,7 +76,8 @@
 
     function ou_CheckSettings () {
         if (initDomainId && initCourseId) {
-            fetch("https://oxctl-modules.s3-eu-west-1.amazonaws.com/" + initDomainId + "/" + initCourseId + ".json")
+            const settingsFileRequestUrl = `${amazonS3bucketUrl}/${initDomainId}/${initCourseId}.json`
+            fetch(settingsFileRequestUrl)
               .then(ou_json)
               .then(function(json) {
                   if (json["modules-navigation"]) {
