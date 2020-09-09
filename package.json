@@ -9,14 +9,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/msdlt/canvas-where-am-I.git"
+    "url": "git+https://github.com/oxctl/canvas-where-am-I.git"
   },
   "author": "",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/msdlt/canvas-where-am-I/issues"
+    "url": "https://github.com/oxctl/canvas-where-am-I/issues"
   },
-  "homepage": "https://github.com/msdlt/canvas-where-am-I#readme",
+  "homepage": "https://github.com/oxctl/canvas-where-am-I#readme",
   "devDependencies": {
     "axios": "^0.19.0",
     "cypress": "^3.8.1",
