@@ -21,7 +21,7 @@
     "axios": "^0.20.0",
     "dotenv": "^8.2.0",
     "http-server": "^0.12.3",
-    "jest": "^24.9.0",
+    "jest": "^26.4.2",
     "jest-puppeteer": "^4.4.0",
     "puppeteer": "^2.1.1"
   },
