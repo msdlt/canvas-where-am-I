@@ -12,9 +12,9 @@
     /* Amazon S3 bucket URL, this URL is needed to retrieve the course presentation and navigation settings */
     const amazonS3bucketUrl = `https://oxctl-modules.s3-eu-west-1.amazonaws.com/`
 
-    var noOfColumnsPerRow = 4;  //no of columns per row of tiles at top of Modules page - 1, 2, 3, 4, 6 or 12 - ONLY USE 4 for the moment
+    const noOfColumnsPerRow = 4;  //no of columns per row of tiles at top of Modules page - 1, 2, 3, 4, 6 or 12 - ONLY USE 4 for the moment
     /* colours for Module tiles mostly randomly selected from: https://www.ox.ac.uk/public-affairs/style-guide/digital-style-guide */
-    var moduleColours = [
+    const moduleColours = [
         '#e8ab1e','#91b2c6','#517f96','#1c4f68',
         '#400b42','#293f11','#640D14','#b29295',
         '#002147','#cf7a30','#a79d96','#aab300',
@@ -30,30 +30,32 @@
 
     //var showItemLinks = 1; //whether or not to show drop-down links to items within Modules in tiles NOTE: Currently disabled - need to read this: https://www.w3.org/WAI/tutorials/menus/application-menus-code/ for how to do it accessibly
 
-    var widthOfButton = 42;  //width of a Progress bar button //TODO - calculate this
-    var widthOfCentreColPadding = 72; //used to calculate whether enough room to show Progress bar buttons //TODO - calculate this
-    var widthOfPositionWords = 134; //used to calculate whether enough room to show Progress bar buttons //TODO - calculate this
-    var allowMultilineModuleTitles = false; //whether to allow LH menu Module links to be multiline
+    const widthOfButton = 42;  //width of a Progress bar button //TODO - calculate this
+    const widthOfCentreColPadding = 72; //used to calculate whether enough room to show Progress bar buttons //TODO - calculate this
+    // const widthOfPositionWords = 134; //used to calculate whether enough room to show Progress bar buttons //TODO - calculate this
+    const allowMultilineModuleTitles = false; //whether to allow LH menu Module links to be multiline
 
     /* DOM elements to check for */
     var divCourseHomeContent = document.getElementById('course_home_content');  //is this page Home
     var divContent = document.getElementById('content');
-    var divContextModulesContainer = document.getElementById('context_modules_sortable_container');  //are we on the Modules page
+    const divContextModulesContainer = document.getElementById('context_modules_sortable_container');  //are we on the Modules page
     //var aModules = document.querySelector('li.section a[class="modules"]'); //retutrns breadcrumbs AND lh Nav
     // This doesn't match if the modules page is hidden
-    var aModules = Array.from(document.querySelectorAll('li.section a')).find(el => el.textContent === 'Modules'); //see: https://stackoverflow.com/questions/37098405/javascript-queryselector-find-div-by-innertext
+    const aModules = Array.from(document.querySelectorAll('li.section a')).find(el => el.textContent === 'Modules'); //see: https://stackoverflow.com/questions/37098405/javascript-queryselector-find-div-by-innertext
 
-    /* Global bvariables */
+    /* Global variables */
     var moduleNav;
     var divFooterContent;
 
     /* Working out and storing where we are in Course */
     var moduleIdByModuleItemId = [] //used to store moduleIds using the ModuleItemId (as shown in url for pages, etc) so we can show active sub-modules {moduleId: x, moduleName: x, progress: x}
     var moduleItemsForProgress = []  //used to store details of module items so can show as dots, if enough space, at bottom of page {href: string, title: string: icon: string, current: bool} - keyed first by module
-    var initCourseId = ou_getCourseId();  //which course are we in ONLY WORKS ON WEB
-    var initDomainId = ou_getDomainRootAccountId(); // The domain ID.
-    var initModuleItemId = ou_getModuleItemId();  //0 or module_item_id from URL (ie only if launched through Modules)
-    var initModuleId = ou_getModuleId();  //0 or module being viewed within Modules page
+
+    /* Context variables */
+    const initCourseId = ou_getCourseId();  //which course are we in ONLY WORKS ON WEB
+    const initDomainId = ou_getDomainRootAccountId(); // The domain ID.
+    const initModuleItemId = ou_getModuleItemId();  //0 or module_item_id from URL (ie only if launched through Modules)
+    const initModuleId = ou_getModuleId();  //0 or module being viewed within Modules page
 
     /**** End of Configuration Section ******/
 
@@ -63,7 +65,7 @@
         if(initCourseId) {
             if(initModuleId) {
                 //we're on Modules page with link to specific module - let's hide other Modules'
-                var otherModuleDivs = document.querySelectorAll('div.context_module:not([data-module-id="'+initModuleId+'"])'); //should only be one!; //should only be one!
+                var otherModuleDivs = document.querySelectorAll(`div.context_module:not([data-module-id="${initModuleId}"])`); //should only be one!; //should only be one!
                 Array.prototype.forEach.call(otherModuleDivs, function(otherModuleDiv){
                     otherModuleDiv.style.display = 'none';
                 });
@@ -177,7 +179,7 @@
                         moduleTile.title = module.name;
 
                         var moduleTileLink = document.createElement("a");
-                        moduleTileLink.href = '/courses/' + initCourseId + '/modules/' + module.id;
+                        moduleTileLink.href = `/courses/${initCourseId}/modules/${module.id}`;
 
                         var moduleTileHeader = document.createElement("div");
                         moduleTileHeader.className="ou-ModuleCard__header_hero_short";
@@ -258,7 +260,7 @@
                                 var listItem = document.createElement('li');
                                 listItem.className = 'ou-menu-item-wrapper';
 
-                                var listItemDest = '/courses/' + initCourseId + '/modules/items/' + itemId;
+                                const listItemDest = `/courses/${initCourseId}/modules/items/${itemId}`;
 
                                 /*var listItemLink = document.createElement("a");
                                 listItemLink.className = iconType;
@@ -351,6 +353,7 @@
                     newLink.innerHTML = module.name;
                     newItem.appendChild(newLink);
                 });
+
                 var liModules = aModules.parentNode;
                 liModules.appendChild(listUl);
 
@@ -463,7 +466,7 @@
 
             //first work out whether have enough room for the progress buttons - if not, show bar
             var progressIconsLarge = true;
-            if((moduleItemsForProgress[moduleIdByModuleItemId[initModuleItemId].moduleId].length * widthOfButton) > (divCentreCol.offsetWidth-widthOfCentreColPadding)) {
+            if((moduleItemsForProgress[moduleIdByModuleItemId[initModuleItemId].moduleId].length * widthOfButton) > (divCentreCol.offsetWidth - widthOfCentreColPadding)) {
                 progressIconsLarge = false;
             }
 
@@ -487,7 +490,7 @@
                 } else {
                     listItem.className = 'ou-progress-item small';
                     //calculate % size
-                    var itemWidth = (divCentreCol.offsetWidth-widthOfCentreColPadding)/noOfItems;
+                    var itemWidth = (divCentreCol.offsetWidth - widthOfCentreColPadding) / noOfItems;
                     if (itemWidth > 30) { //keeps it sqaure
                         itemWidth = 30;
                     }
@@ -540,10 +543,10 @@
             }
 
             //Now work out whether have enough room for the progress buttons - if not, show bar
-            //if((moduleItemsForProgress[moduleIdByModuleItemId[initModuleItemId].moduleId].length * widthOfButton) < (divCentreCol.offsetWidth-widthOfCentreColPadding)) {
+            //if((moduleItemsForProgress[moduleIdByModuleItemId[initModuleItemId].moduleId].length * widthOfButton) < (divCentreCol.offsetWidth - widthOfCentreColPadding)) {
                 divCentreCol.appendChild(divProgressIcons);
             /*} else {
-                if((widthOfPositionWords * 2) < (divCentreCol.offsetWidth-widthOfCentreColPadding)) {
+                if((widthOfPositionWords * 2) < (divCentreCol.offsetWidth - widthOfCentreColPadding)) {
                     //only show label if enough room - ie > 2 x width of label
                     divProgLeftCol.appendChild(divProgressLabel);
                 }
