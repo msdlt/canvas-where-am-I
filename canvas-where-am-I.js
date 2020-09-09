@@ -22,7 +22,9 @@
         '#a79d96','#be0f34','#001c3d','#ac48bf',
         '#9c4700','#c7302b','#ebc4cb','#1daced'
     ];
+
     //var showItemLinks = 1; //whether or not to show drop-down links to items within Modules in tiles NOTE: Currently disabled - need to read this: https://www.w3.org/WAI/tutorials/menus/application-menus-code/ for how to do it accessibly
+
     var widthOfButton = 42;  //width of a Progress bar button //TODO - calculate this
     var widthOfCentreColPadding = 72; //used to calculate whether enough room to show Progress bar buttons //TODO - calculate this
     var widthOfPositionWords = 134; //used to calculate whether enough room to show Progress bar buttons //TODO - calculate this
@@ -35,17 +37,17 @@
     //var aModules = document.querySelector('li.section a[class="modules"]'); //retutrns breadcrumbs AND lh Nav
     // This doesn't match if the modules page is hidden
     var aModules = Array.from(document.querySelectorAll('li.section a')).find(el => el.textContent === 'Modules'); //see: https://stackoverflow.com/questions/37098405/javascript-queryselector-find-div-by-innertext
-    
+
     /* Global bvariables */
     var moduleNav;
     var divFooterContent;
-        
+
     /* Working out and storing where we are in Course */
     var moduleIdByModuleItemId = [] //used to store moduleIds using the ModuleItemId (as shown in url for pages, etc) so we can show active sub-modules {moduleId: x, moduleName: x, progress: x}
     var moduleItemsForProgress = []  //used to store details of module items so can show as dots, if enough space, at bottom of page {href: string, title: string: icon: string, current: bool} - keyed first by module
     var initCourseId = ou_getCourseId();  //which course are we in ONLY WORKS ON WEB
     var initDomainId = ou_getDomainRootAccountId(); // The domain ID.
-    var initModuleItemId = ou_getModuleItemId();  //0 or module_item_id from URL (ie only if launched through Modules) 
+    var initModuleItemId = ou_getModuleItemId();  //0 or module_item_id from URL (ie only if launched through Modules)
     var initModuleId = ou_getModuleId();  //0 or module being viewed within Modules page
 
     /* Wait until DOM ready before processing */
@@ -56,13 +58,13 @@
                 //we're on Modules page with link to specific module - let's hide other Modules'
                 var otherModuleDivs = document.querySelectorAll('div.context_module:not([data-module-id="'+initModuleId+'"])'); //should only be one!; //should only be one!
                 Array.prototype.forEach.call(otherModuleDivs, function(otherModuleDiv){
-                    otherModuleDiv.style.display = 'none';    
+                    otherModuleDiv.style.display = 'none';
                 });
             }
             ou_getModules(initCourseId);
         }
     }
-	
+
     // ou_domReady();
 
     function ou_CheckSettings () {
@@ -83,8 +85,8 @@
 
         }
     }
+
     ou_CheckSettings();
-    
 
     /*
      * Function to work out when the DOM is ready: https://stackoverflow.com/questions/1795089/how-can-i-detect-dom-ready-and-add-a-class-without-jquery/1795167#1795167
@@ -138,12 +140,12 @@
                     moduleNav.className = "ou-ModuleCard__box";
                     moduleNav.innerHTML = '<a id="module_nav_anchor"></a>';
                     divContent.insertBefore(moduleNav, divContent.childNodes[0]); //insert moduleNav onto page
-                    
-                    divCourseHomeContent.style.display = 'none'; 
-                    
+
+                    divCourseHomeContent.style.display = 'none';
+
                     var newRow; //store parent row to append to between iterations
                 }
-                
+
                 //run through each module
                 data.forEach(function(module, mindex){
                     if(divContextModulesContainer && !initModuleId && divCourseHomeContent) {
@@ -152,9 +154,9 @@
                         if(mindex % noOfColumnsPerRow === 0) {
                             newRow = document.createElement("div");
                             newRow.className = "grid-row center-sm";
-                            moduleNav.appendChild(newRow);	
+                            moduleNav.appendChild(newRow);
                         }
-                        
+
                         var newColumn = document.createElement("div");
 
                         // create column wrapper
@@ -167,15 +169,15 @@
                         moduleTile.title = module.name;
 
                         var moduleTileLink = document.createElement("a");
-                        moduleTileLink.href = '/courses/' + initCourseId + '/modules/' + module.id;   
-                        
+                        moduleTileLink.href = '/courses/' + initCourseId + '/modules/' + module.id;
+
                         var moduleTileHeader = document.createElement("div");
                         moduleTileHeader.className="ou-ModuleCard__header_hero_short";
                         moduleTileHeader.style.backgroundColor = moduleColours[mindex];
-                        
+
                         var moduleTileContent = document.createElement("div");
                         moduleTileContent.className = "ou-ModuleCard__header_content";
-                       
+
                         /*if(showItemLinks && module.items.length > 0) {
                             //don't add drop-down if not showItemLinks or if no items in Module
                             var moduleTileActions = document.createElement("div");
@@ -210,11 +212,11 @@
                             if(item.type !== "SubHeader") { //don't want these represented anywhere - on Modules tiles dropdowns OR in progress buttons
                                 //TODO factor in the number of Text Headers before calculating % complete
                                 //var progressAsPercentage = Math.round(((iindex+1)/module.items.length)*100);
-                                
+
                                 var tempObj = {
-                                    moduleId: item.module_id, 
-                                    moduleName: module.name/*, 
-                                    progress: progressAsPercentage */   
+                                    moduleId: item.module_id,
+                                    moduleName: module.name/*,
+                                    progress: progressAsPercentage */
                                 }
 
                                 moduleIdByModuleItemId[parseInt(item.id)] = tempObj; //for deciding which sub-module on lh menu is active
@@ -261,14 +263,14 @@
                                 listItem.appendChild(listItemLink);*/
 
                                 /*if(divContextModulesContainer && showItemLinks) {
-                                    moduleTileList.appendChild(listItem);    
+                                    moduleTileList.appendChild(listItem);
                                 } else {*/
                                     //note only want to do this for current module
                                     var isCurrentItem = parseInt(initModuleItemId) == parseInt(item.id);
                                     var tempNavObj = {
-                                        href: listItemDest, 
-                                        title: item.title, 
-                                        icon: iconType, 
+                                        href: listItemDest,
+                                        title: item.title,
+                                        icon: iconType,
                                         current: isCurrentItem
                                     }
                                     moduleItemsForProgress[module.id][iindex] = tempNavObj;
@@ -278,18 +280,18 @@
                     }
                     if(divContextModulesContainer && !initModuleId && divCourseHomeContent) {
                         //only needed on all Modules page
-                        
+
                         var moduleTileTitle = document.createElement("div");
                         moduleTileTitle.classList.add("ou-ModuleCard__header-title");
                         moduleTileTitle.classList.add("ellipsis");
                         moduleTileTitle.title = module.name;
                         moduleTileTitle.style.color = moduleColours[mindex];
-                        moduleTileTitle.innerHTML = module.name; 
+                        moduleTileTitle.innerHTML = module.name;
 
                         /*if(showItemLinks && module.items.length > 0) {
                             //only add actions if required
                             moduleTileActions.appendChild(moduleTileArrowButton);
-                            
+
                             var rowForItems = document.createElement("div");
                             rowForItems.className = "grid-row center-sm ou-items-menu";
                             rowForItems.id = "items-menu-" + module.id;
@@ -300,7 +302,7 @@
                             //console.log('adding actions');
                         } else {*/
                             //only leave space for actions if we're adding them
-                            moduleTileTitle.classList.add("ou-no-actions");  
+                            moduleTileTitle.classList.add("ou-no-actions");
                         /*}*/
 
                         moduleTileContent.appendChild(moduleTileTitle);
@@ -309,7 +311,7 @@
                         moduleTile.appendChild(moduleTileLink);
                         newColumn.appendChild(moduleTile);
                     }
-                    
+
                     //LH MENU
                     //create li
                     var newItem = document.createElement("li");
@@ -319,7 +321,7 @@
                     var newLink = document.createElement("a");
                     newLink.className = "ou-section-link-sub"; //Note set active if necessary
                     if (allowMultilineModuleTitles) {
-                        newLink.classList.add("ou-multiline");          
+                        newLink.classList.add("ou-multiline");
                     }
                     //check if we need to make one of our sub-menu modules active
                     if((initModuleItemId && moduleIdByModuleItemId[initModuleItemId] && moduleIdByModuleItemId[initModuleItemId].moduleId && moduleIdByModuleItemId[initModuleItemId].moduleId==module.id) || (initModuleId && initModuleId==parseInt(module.id))) {
@@ -329,21 +331,21 @@
                             //code to remove active from here: http://youmightnotneedjquery.com/
                             var classNameToRemove = 'active';
                             if (sectionLink.classList) {
-                                sectionLink.classList.remove(classNameToRemove);    
+                                sectionLink.classList.remove(classNameToRemove);
                             } else {
-                                sectionLink.className = sectionLink.className.replace(new RegExp('(^|\\b)' + classNameToRemove.split(' ').join('|') + '(\\b|$)', 'gi'), ' ');    
+                                sectionLink.className = sectionLink.className.replace(new RegExp('(^|\\b)' + classNameToRemove.split(' ').join('|') + '(\\b|$)', 'gi'), ' ');
                             }
                         });
                         newLink.classList.add('active');  //make current Module active
                     }
                     newLink.title = module.name;
-                    newLink.href = '/courses/' + courseId + '/modules/' + module.id;   
+                    newLink.href = '/courses/' + courseId + '/modules/' + module.id;
                     newLink.innerHTML = module.name;
                     newItem.appendChild(newLink);
                 });
                 var liModules = aModules.parentNode;
                 liModules.appendChild(listUl);
-            
+
                 //now add Progress Bar
                 var spoof = setTimeout(ou_showProgressBar, 100); //timeout to ensure all elements have really loaded before running
 
@@ -351,9 +353,9 @@
                 /*document.addEventListener('click', function (event) {
                     if (!event.target.getAttribute("menu-to-show")) return;
                     // Don't follow the link
-                    event.preventDefault(); 
-                    ou_handleArrowPress(event.target);   
-                                
+                    event.preventDefault();
+                    ou_handleArrowPress(event.target);
+
                 }, false);
 
                 document.addEventListener('keydown', function (event) {
@@ -362,8 +364,8 @@
                             //console.log(event.target.tagName);
                             event.preventDefault();
                             event.stopPropagation();
-                            ou_handleArrowPress(event.target);  
-                            return false; 
+                            ou_handleArrowPress(event.target);
+                            return false;
                         }
                     }
                 }, false);*/
@@ -377,7 +379,7 @@
 
     /*function ou_handleArrowPress(clickee) {
         // If the clicked element isn't a button which shows a menu
-        
+
         var menuToShow = document.getElementById(clickee.getAttribute("menu-to-show"));
         if (menuToShow.style.maxHeight){
             menuToShow.style.maxHeight = null;
@@ -385,16 +387,16 @@
             if(clickee.tagName === "I") {
                 clickee.classList.remove("open");
             } else if(clickee.tagName === "A") {
-                clickee.children[0].classList.remove("open"); 
+                clickee.children[0].classList.remove("open");
             }
-            
+
         } else {
             //before we show this one, make sure all the others are closed
             var itemsMenus = document.getElementsByClassName("ou-items-menu");
             Array.prototype.forEach.call(itemsMenus, function(itemsMenu, index) {
                 if (itemsMenu.style.maxHeight){
-                    itemsMenu.style.maxHeight = null;     
-                }   
+                    itemsMenu.style.maxHeight = null;
+                }
             });
             var menuButtons = document.getElementsByClassName("icon-mini-arrow-down");
             Array.prototype.forEach.call(menuButtons, function(menuButton, index) {
@@ -404,12 +406,12 @@
             if(clickee.tagName === "I") {
                 clickee.classList.add("open");
             } else if(clickee.tagName === "A") {
-                clickee.children[0].classList.add("open"); 
+                clickee.children[0].classList.add("open");
             }
             //event.target.classList.add("open");
-        } 
+        }
     }*/
-    
+
     /*
      * Function which shows progress bar between Next and Previous buttons IF item shown as part of Module
      */
@@ -431,7 +433,7 @@
             divProgRightCol.classList.add("ou-ProgRightCol");
             progressBarContainer.appendChild(divProgLeftCol);
             progressBarContainer.appendChild(divProgRightCol);
-            
+
             //Progress bar itself
 
             //Now create flexible divs to pop progress bar and next and previous buttons into
@@ -450,7 +452,7 @@
             divColContainer.appendChild(divRightCol);
             //3. Place new progressBarContainer in the middle flexible div
             divFooterContent.appendChild(divColContainer);
-            
+
             //first work out whether have enough room for the progress buttons - if not, show bar
             var progressIconsLarge = true;
             if((moduleItemsForProgress[moduleIdByModuleItemId[initModuleItemId].moduleId].length * widthOfButton) > (divCentreCol.offsetWidth-widthOfCentreColPadding)) {
@@ -467,13 +469,13 @@
             //} else {
             //    divProgressItems.className = 'ou-progress-items small';
             //}
-            
+
             moduleItemsForProgress[moduleIdByModuleItemId[initModuleItemId].moduleId].forEach(function(item, index) {
                 var listItem = document.createElement('li');
                 var listItemLink = document.createElement("a");
                 if (progressIconsLarge) {
                     listItem.className = 'ou-progress-item';
-                    listItemLink.classList.add(item.icon);                    
+                    listItemLink.classList.add(item.icon);
                 } else {
                     listItem.className = 'ou-progress-item small';
                     //calculate % size
@@ -482,19 +484,19 @@
                         itemWidth = 30;
                     }
                     listItem.style.width = itemWidth + 'px';
-                    //listItemLink.classList.add(item.icon);  
+                    //listItemLink.classList.add(item.icon);
                 }
                 if(item.current) {
-                    listItemLink.classList.add("active");    
+                    listItemLink.classList.add("active");
                 }
                 listItemLink.href = item.href;
                 listItemLink.setAttribute("role", "menuitem");
                 listItemLink.title = item.title;
-                listItem.appendChild(listItemLink);  
+                listItem.appendChild(listItemLink);
                 divProgressItems.appendChild(listItem);
             });
             divProgressIcons.appendChild(divProgressItems);
-                        
+
             //create bar version
             /*var divProgressBar = document.createElement("div");
             divProgressBar.classList.add("ou-ProgressBar");
@@ -510,8 +512,8 @@
             //Wording
             var divProgressLabel = document.createElement("div");
             divProgressLabel.textContent = 'Position in module: '*/
-                     
-            
+
+
             //look for Previous button
             var previousButton = document.querySelector('a.module-sequence-footer-button--previous');
             //var previousButtonTop;  //disabled at the moment as Canvas had very non-standard headers
@@ -528,7 +530,7 @@
                 //nextButtonTop = nextButton.cloneNode(true);
                 //nextButtonTop.classList.add("ou-NextTop"); //make space on right
             }
-            
+
             //Now work out whether have enough room for the progress buttons - if not, show bar
             //if((moduleItemsForProgress[moduleIdByModuleItemId[initModuleItemId].moduleId].length * widthOfButton) < (divCentreCol.offsetWidth-widthOfCentreColPadding)) {
                 divCentreCol.appendChild(divProgressIcons);
@@ -540,8 +542,8 @@
                 divProgRightCol.appendChild(divProgressBar);
                 divCentreCol.appendChild(progressBarContainer);
             }*/
-            
-            /* 
+
+            /*
              * Cloning prevous and next and adding to appropriate parts of header
              *
              * Note that .header-left-flex and .header-right-flex don't exist on several content types (below)
@@ -554,12 +556,12 @@
              * - External URL = no header - could add as immediate child of div#content
              * - External tool = no header - could add immedioately below div#content
              */
-            
+
             /*if(previousButtonTop) {
                 var divHeaderLefts = document.getElementsByClassName('header-left-flex'); //this is the left header element for Pages
                 if(divHeaderLefts.length > 0) {
                     var divHeaderLeft = divHeaderLefts[0];
-                    divHeaderLeft.insertBefore(previousButtonTop, divHeaderLeft.firstChild); 
+                    divHeaderLeft.insertBefore(previousButtonTop, divHeaderLeft.firstChild);
                 } else {
                     //var discussionManageBar = document.getElementById('discussion-managebar');
                     //if(discussionManageBar) {
@@ -580,9 +582,9 @@
                     //}
                 }
             }*/
-            
-            
-        }    
+
+
+        }
     }
 
     /* Utility functions */
@@ -622,14 +624,14 @@
     function ou_getCourseId() {
         var courseId = ENV.COURSE_ID || ENV.course_id;
         if(!courseId){
-            var urlPartIncludingCourseId = window.location.href.split("courses/")[1]; 
+            var urlPartIncludingCourseId = window.location.href.split("courses/")[1];
             if(urlPartIncludingCourseId) {
-                courseId = urlPartIncludingCourseId.split("/")[0];    
+                courseId = urlPartIncludingCourseId.split("/")[0];
             }
         }
         return courseId;
     }
-    
+
     /**
      * Function which gets find module_item_id from URL - currently ONLY ON WEB
      * @returns {int} id of module_item or 0 for not found
@@ -658,7 +660,7 @@
         }
         return moduleItemId;
     }
-    
+
     /**
      * Function which gets find module id from URL - currently ONLY ON WEB
      * @returns {int} id of module or 0 for not found
@@ -672,7 +674,7 @@
             startPos = startPos + moduleIdTerm.length; //account for length of moduleItemTerm as found beginning position
             moduleId = parseInt(currentUrl.slice(startPos)); //will substring from end
             //console.log(startPos + " " + finishPos + " " + currentUrl.slice(startPos, finishPos));
-        } 
+        }
         return moduleId;
     }
 
@@ -684,7 +686,7 @@
     function ou_insertAfter(newNode, referenceNode) {
         referenceNode.parentNode.insertBefore(newNode, referenceNode.nextSibling);
     }
-    
+
     /*
      * Get self id - actually only needed to show completion - NOT CURRENTLY USED
      */
@@ -707,13 +709,5 @@
             }
         );
     }
-    
-    
-    /*************************************************************
-     *
-     * End Canvas_Module-Tiles 
-     *
-     *************************************************************/
-    
-    
+
 })();
