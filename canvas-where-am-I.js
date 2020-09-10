@@ -118,7 +118,7 @@
      * Get modules for courseId
      */
     function ou_getModules(courseId) {
-        //Added &per_page=100, otherwise only returns the first 10
+        // Added &per_page=100, otherwise only returns the first 10
         const moduleRequest = `/api/v1/courses/${courseId}/modules?include=items&per_page=100`;
         fetch(moduleRequest, {
                 method: 'GET',
@@ -129,16 +129,20 @@
             })
             .then(ou_status)
             .then(ou_json)
-            .then(function(data) {
-                //note - combining creation of lh modules sub-menu and Module tiles on Modules page to avoid repeated loops through data
-                //set up some things before we begin going through Modules
+            .then(function(moduleArray) {
+                // moduleArray contains an array of Module objects
+                // https://canvas.instructure.com/doc/api/modules.html#Module
+                // note - combining creation of lh modules sub-menu and Module tiles on Modules page to avoid repeated loops through data
+                // set up some things before we begin going through Modules
                 var listUl = document.createElement('ul');  //the containing element for the modules sub-menu
                 listUl.className = 'ou-section-tabs-sub';
-                if(divContextModulesContainer && !initModuleId && divCourseHomeContent) {
+
+                const isCourseHome = divContextModulesContainer && !initModuleId && divCourseHomeContent
+                if (isCourseHome) {
                     //only needed on all Modules page IF it is the home page
                     //first delete any existing nav container
                     var existingModuleNav = document.getElementById('module_nav');
-                    if(existingModuleNav) {
+                    if (existingModuleNav) {
                         existingModuleNav.parentNode.removeChild(existingModuleNav);
                     }
                     //create our nav container
@@ -154,8 +158,9 @@
                 }
 
                 //run through each module
-                data.forEach(function(module, mindex){
-                    if(divContextModulesContainer && !initModuleId && divCourseHomeContent) {
+                moduleArray.forEach(function(module, mindex) {
+
+                    if(isCourseHome) {
                         //only needed on all Modules page
                         //create row for card
                         if(mindex % noOfColumnsPerRow === 0) {
@@ -214,9 +219,11 @@
                         }
                         */
                     }
+
                     moduleItemsForProgress[module.id] = [];
+
                     //If we're on a page launched via Modules, initModuleItemId != 0 so or if we have launched the whole Modules page (ie need menu at top)
-                    if(initModuleItemId || (divContextModulesContainer && !initModuleId && divCourseHomeContent)) {
+                    if(initModuleItemId || isCourseHome) {
                         module.items.forEach(function(item, iindex){
                             if(item.type !== 'SubHeader') { //don't want these represented anywhere - on Modules tiles dropdowns OR in progress buttons
                                 //TODO factor in the number of Text Headers before calculating % complete
@@ -298,7 +305,8 @@
                             }
                         });
                     }
-                    if(divContextModulesContainer && !initModuleId && divCourseHomeContent) {
+
+                    if(isCourseHome) {
                         //only needed on all Modules page
 
                         var moduleTileTitle = document.createElement('div');
