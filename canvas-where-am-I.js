@@ -185,7 +185,8 @@
                         var moduleTileContent = document.createElement('div');
                         moduleTileContent.className = 'ou-ModuleCard__header_content';
 
-                        /*if(showItemLinks && module.items.length > 0) {
+                        /*
+                        if(showItemLinks && module.items.length > 0) {
                             //don't add drop-down if not showItemLinks or if no items in Module
                             var moduleTileActions = document.createElement('div');
                             moduleTileActions.className = 'ou-drop-down-arrow';
@@ -210,7 +211,8 @@
                             moduleTileList.setAttribute('aria-hidden',true);
                             moduleTileList.setAttribute('aria-expanded',false);
                             moduleTileList.setAttribute('aria-activedescendant','toolbar-' + module.id + '-1');
-                        }*/
+                        }
+                        */
                     }
                     moduleItemsForProgress[module.id] = [];
                     //If we're on a page launched via Modules, initModuleItemId != 0 so or if we have launched the whole Modules page (ie need menu at top)
