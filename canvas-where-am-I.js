@@ -118,7 +118,9 @@
      * Get modules for courseId
      */
     function ou_getModules(courseId) {
-        fetch('/api/v1/courses/' + courseId + '/modules?include=items&per_page=100',{  //Added &per_page=100, otherwise only returns the first 10
+        //Added &per_page=100, otherwise only returns the first 10
+        const moduleRequest = `/api/v1/courses/${courseId}/modules?include=items&per_page=100`;
+        fetch(moduleRequest, {
                 method: 'GET',
                 credentials: 'include',
                 headers: {
