@@ -30,7 +30,7 @@
         '#9c4700','#c7302b','#ebc4cb','#1daced'
     ];
 
-    //var showItemLinks = 1; //whether or not to show drop-down links to items within Modules in tiles NOTE: Currently disabled - need to read this: https://www.w3.org/WAI/tutorials/menus/application-menus-code/ for how to do it accessibly
+    // var showItemLinks = 1; //whether or not to show drop-down links to items within Modules in tiles NOTE: Currently disabled - need to read this: https://www.w3.org/WAI/tutorials/menus/application-menus-code/ for how to do it accessibly
 
     const widthOfButton = 42;  //width of a Progress bar button //TODO - calculate this
     const widthOfCentreColPadding = 72; //used to calculate whether enough room to show Progress bar buttons //TODO - calculate this
@@ -226,7 +226,7 @@
 
                                 moduleIdByModuleItemId[parseInt(item.id)] = tempObj; //for deciding which sub-module on lh menu is active
 
-                                //var itemTitle = item.title;
+                                // var itemTitle = item.title;
                                 var itemId = item.id;
                                 var itemType = item.type;
                                 var iconType;
@@ -256,8 +256,18 @@
                                 listItem.className = 'ou-menu-item-wrapper';
 
                                 const listItemDest = `/courses/${initCourseId}/modules/items/${itemId}`;
+                                // note only want to do this for current module
+                                var isCurrentItem = parseInt(initModuleItemId) == parseInt(item.id);
+                                var tempNavObj = {
+                                    href: listItemDest,
+                                    title: item.title,
+                                    icon: iconType,
+                                    current: isCurrentItem
+                                };
+                                moduleItemsForProgress[module.id][iindex] = tempNavObj;
 
-                                /*var listItemLink = document.createElement("a");
+                                /*
+                                var listItemLink = document.createElement("a");
                                 listItemLink.className = iconType;
                                 listItemLink.href = listItemDest;
                                 listItemLink.text = itemTitle;
@@ -265,11 +275,11 @@
                                 listItemLink.setAttribute("role", "menuitem");
                                 listItemLink.title = itemTitle;
 
-                                listItem.appendChild(listItemLink);*/
+                                listItem.appendChild(listItemLink);
 
-                                /*if(divContextModulesContainer && showItemLinks) {
+                                if(divContextModulesContainer && showItemLinks) {
                                     moduleTileList.appendChild(listItem);
-                                } else {*/
+                                } else {
                                     //note only want to do this for current module
                                     var isCurrentItem = parseInt(initModuleItemId) == parseInt(item.id);
                                     var tempNavObj = {
@@ -279,7 +289,8 @@
                                         current: isCurrentItem
                                     };
                                     moduleItemsForProgress[module.id][iindex] = tempNavObj;
-                                /* } */
+                                }
+                                */
                             }
                         });
                     }
@@ -292,8 +303,11 @@
                         moduleTileTitle.title = module.name;
                         moduleTileTitle.style.color = moduleColours[mindex];
                         moduleTileTitle.innerHTML = module.name;
+                        //only leave space for actions if we're adding them
+                        moduleTileTitle.classList.add("ou-no-actions");
 
-                        /*if(showItemLinks && module.items.length > 0) {
+                        /*
+                        if(showItemLinks && module.items.length > 0) {
                             //only add actions if required
                             moduleTileActions.appendChild(moduleTileArrowButton);
 
@@ -304,11 +318,11 @@
                             rowForItems.appendChild(moduleTileList);
                             //moduleTileActions.appendChild(moduleTileList);
                             moduleTileContent.appendChild(moduleTileActions);
-                            //console.log('adding actions');
-                        } else {*/
+                        } else {
                             //only leave space for actions if we're adding them
                             moduleTileTitle.classList.add("ou-no-actions");
-                        /*}*/
+                        }
+                        */
 
                         moduleTileContent.appendChild(moduleTileTitle);
                         moduleTileLink.appendChild(moduleTileHeader);
@@ -356,7 +370,8 @@
                 setTimeout(ou_showProgressBar, 100); //timeout to ensure all elements have really loaded before running
 
                 //click event listener for module tile buttons
-                /*document.addEventListener('click', function (event) {
+                /*
+                document.addEventListener('click', function (event) {
                     if (!event.target.getAttribute("menu-to-show")) return;
                     // Don't follow the link
                     event.preventDefault();
@@ -367,14 +382,14 @@
                 document.addEventListener('keydown', function (event) {
                     if (event.target.getAttribute("menu-to-show")) {
                         if (event.keyCode == 13 || event.keyCode == 32 || event.keyCode == 38 || event.keyCode == 40) {
-                            //console.log(event.target.tagName);
                             event.preventDefault();
                             event.stopPropagation();
                             ou_handleArrowPress(event.target);
                             return false;
                         }
                     }
-                }, false);*/
+                }, false);
+                */
 
             })
             .catch(function(error) {
@@ -392,8 +407,7 @@
         if(footerContents.length > 0) {
             divFooterContent = footerContents[0];
         }
-        console.log(divFooterContent);
-        console.log(initModuleItemId);
+
         if(divFooterContent && initModuleItemId) {
             //we have a footer and we're viewing via Modules
             var progressBarContainer = document.createElement("div");
@@ -435,11 +449,14 @@
             divProgressIcons.className = 'ou-progress-icons';
             var noOfItems = moduleItemsForProgress[moduleIdByModuleItemId[initModuleItemId].moduleId].length;
             var divProgressItems = document.createElement("ul");
-            //if (progressIconsLarge) {
+            divProgressItems.className = 'ou-progress-items';
+            /*
+            if (progressIconsLarge) {
                 divProgressItems.className = 'ou-progress-items';
-            //} else {
-            //    divProgressItems.className = 'ou-progress-items small';
-            //}
+            } else {
+                divProgressItems.className = 'ou-progress-items small';
+            }
+            */
 
             moduleItemsForProgress[moduleIdByModuleItemId[initModuleItemId].moduleId].forEach(function(item, index) {
                 var listItem = document.createElement('li');
@@ -469,7 +486,8 @@
             divProgressIcons.appendChild(divProgressItems);
 
             //create bar version
-            /*var divProgressBar = document.createElement("div");
+            /*
+            var divProgressBar = document.createElement("div");
             divProgressBar.classList.add("ou-ProgressBar");
             divProgressBar.setAttribute('aria-valuemax', 100);
             divProgressBar.setAttribute('aria-valuemin', 0);
@@ -482,16 +500,19 @@
             divProgressBar.appendChild(divProgressBarBar);
             //Wording
             var divProgressLabel = document.createElement("div");
-            divProgressLabel.textContent = 'Position in module: '*/
+            divProgressLabel.textContent = 'Position in module: '
+            */
 
 
             //look for Previous button
             var previousButton = document.querySelector('a.module-sequence-footer-button--previous');
-            //var previousButtonTop;  //disabled at the moment as Canvas had very non-standard headers
+            // var previousButtonTop;  //disabled at the moment as Canvas had very non-standard headers
             if(previousButton) {
                 divLeftCol.appendChild(previousButton);
-                /*previousButtonTop = previousButton.cloneNode(true);
-                previousButtonTop.classList.add("ou-PreviousTop"); //make space on right*/
+                /*
+                previousButtonTop = previousButton.cloneNode(true);
+                previousButtonTop.classList.add("ou-PreviousTop"); //make space on right
+                */
             }
             //look for Next button
             var nextButton = document.querySelector('span.module-sequence-footer-button--next');
@@ -502,17 +523,21 @@
                 //nextButtonTop.classList.add("ou-NextTop"); //make space on right
             }
 
+            divCentreCol.appendChild(divProgressIcons);
+
             //Now work out whether have enough room for the progress buttons - if not, show bar
-            //if((moduleItemsForProgress[moduleIdByModuleItemId[initModuleItemId].moduleId].length * widthOfButton) < (divCentreCol.offsetWidth - widthOfCentreColPadding)) {
+            /*
+            if((moduleItemsForProgress[moduleIdByModuleItemId[initModuleItemId].moduleId].length * widthOfButton) < (divCentreCol.offsetWidth - widthOfCentreColPadding)) {
                 divCentreCol.appendChild(divProgressIcons);
-            /*} else {
+            } else {
                 if((widthOfPositionWords * 2) < (divCentreCol.offsetWidth - widthOfCentreColPadding)) {
                     //only show label if enough room - ie > 2 x width of label
                     divProgLeftCol.appendChild(divProgressLabel);
                 }
                 divProgRightCol.appendChild(divProgressBar);
                 divCentreCol.appendChild(progressBarContainer);
-            }*/
+            }
+            */
 
             /*
              * Cloning prevous and next and adding to appropriate parts of header
@@ -528,7 +553,8 @@
              * - External tool = no header - could add immedioately below div#content
              */
 
-            /*if(previousButtonTop) {
+            /*
+            if(previousButtonTop) {
                 var divHeaderLefts = document.getElementsByClassName('header-left-flex'); //this is the left header element for Pages
                 if(divHeaderLefts.length > 0) {
                     var divHeaderLeft = divHeaderLefts[0];
@@ -540,6 +566,7 @@
                     }
                 }
             }
+
             if(nextButtonTop) {
                 var divHeaderRights = document.getElementsByClassName('header-right-flex'); //this is the right header element for Pages
                 if(divHeaderRights.length > 0) {
@@ -552,9 +579,8 @@
                         //we should be in a discussion
                     //}
                 }
-            }*/
-
-
+            }
+            */
         }
     }
 
@@ -570,6 +596,7 @@
             return Promise.reject(new Error(response.statusText));
         }
     }
+
     /*
      * Function which returns json from response
      * @param {Object} response
@@ -618,7 +645,6 @@
                 finishPos = currentUrl.length;
             }
             moduleItemId = parseInt(currentUrl.slice(startPos, finishPos));
-            //console.log(startPos + " " + finishPos + " " + currentUrl.slice(startPos, finishPos));
         } else {
             //for external links at least, we have a URL in the format: /courses/13199/modules/items/87888 so let's seee if we can extract from that
             moduleItemTerm = '/modules/items/';
@@ -643,7 +669,6 @@
         if(startPos != -1) {
             startPos = startPos + moduleIdTerm.length; //account for length of moduleItemTerm as found beginning position
             moduleId = parseInt(currentUrl.slice(startPos)); //will substring from end
-            //console.log(startPos + " " + finishPos + " " + currentUrl.slice(startPos, finishPos));
         }
         return moduleId;
     }
