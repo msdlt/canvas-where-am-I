@@ -10,7 +10,7 @@
     /**** Start of Configuration Section ****/
 
     /* Amazon S3 bucket URL, this URL is needed to retrieve the course presentation and navigation settings */
-    const amazonS3bucketUrl = `https://oxctl-modules.s3-eu-west-1.amazonaws.com/`
+    const amazonS3bucketUrl = `https://oxctl-modules.s3-eu-west-1.amazonaws.com/`;
 
     const noOfColumnsPerRow = 4;  //no of columns per row of tiles at top of Modules page - 1, 2, 3, 4, 6 or 12 - ONLY USE 4 for the moment
     /* colours for Module tiles mostly randomly selected from: https://www.ox.ac.uk/public-affairs/style-guide/digital-style-guide */
@@ -48,8 +48,8 @@
     var divFooterContent;
 
     /* Working out and storing where we are in Course */
-    var moduleIdByModuleItemId = [] //used to store moduleIds using the ModuleItemId (as shown in url for pages, etc) so we can show active sub-modules {moduleId: x, moduleName: x, progress: x}
-    var moduleItemsForProgress = []  //used to store details of module items so can show as dots, if enough space, at bottom of page {href: string, title: string: icon: string, current: bool} - keyed first by module
+    var moduleIdByModuleItemId = []; //used to store moduleIds using the ModuleItemId (as shown in url for pages, etc) so we can show active sub-modules {moduleId: x, moduleName: x, progress: x}
+    var moduleItemsForProgress = []; //used to store details of module items so can show as dots, if enough space, at bottom of page {href: string, title: string: icon: string, current: bool} - keyed first by module
 
     /* Context variables */
     const initCourseId = ou_getCourseId();  //which course are we in ONLY WORKS ON WEB
@@ -78,7 +78,7 @@
 
     function ou_CheckSettings () {
         if (initDomainId && initCourseId) {
-            const settingsFileRequestUrl = `${amazonS3bucketUrl}/${initDomainId}/${initCourseId}.json`
+            const settingsFileRequestUrl = `${amazonS3bucketUrl}/${initDomainId}/${initCourseId}.json`;
             fetch(settingsFileRequestUrl)
               .then(ou_json)
               .then(function(json) {
@@ -215,7 +215,7 @@
                             moduleTileList.setAttribute("aria-activedescendant","toolbar-" + module.id + "-1");
                         }*/
                     }
-                    moduleItemsForProgress[module.id] = []
+                    moduleItemsForProgress[module.id] = [];
                     //If we're on a page launched via Modules, initModuleItemId != 0 so or if we have launched the whole Modules page (ie need menu at top)
                     if(initModuleItemId || (divContextModulesContainer && !initModuleId && divCourseHomeContent)) {
                         module.items.forEach(function(item, iindex){
@@ -227,11 +227,11 @@
                                     moduleId: item.module_id,
                                     moduleName: module.name/*,
                                     progress: progressAsPercentage */
-                                }
+                                };
 
                                 moduleIdByModuleItemId[parseInt(item.id)] = tempObj; //for deciding which sub-module on lh menu is active
 
-                                var itemTitle = item.title;
+                                //var itemTitle = item.title;
                                 var itemId = item.id;
                                 var itemType = item.type;
                                 var iconType;
@@ -282,7 +282,7 @@
                                         title: item.title,
                                         icon: iconType,
                                         current: isCurrentItem
-                                    }
+                                    };
                                     moduleItemsForProgress[module.id][iindex] = tempNavObj;
                                 /* } */
                             }
@@ -358,7 +358,7 @@
                 liModules.appendChild(listUl);
 
                 //now add Progress Bar
-                var spoof = setTimeout(ou_showProgressBar, 100); //timeout to ensure all elements have really loaded before running
+                setTimeout(ou_showProgressBar, 100); //timeout to ensure all elements have really loaded before running
 
                 //click event listener for module tile buttons
                 /*document.addEventListener('click', function (event) {
@@ -471,10 +471,10 @@
             }
 
             //create individual progress buttons version
-            divProgressIcons = document.createElement("div");
+            var divProgressIcons = document.createElement("div");
             divProgressIcons.className = 'ou-progress-icons';
             var noOfItems = moduleItemsForProgress[moduleIdByModuleItemId[initModuleItemId].moduleId].length;
-            divProgressItems = document.createElement("ul");
+            var divProgressItems = document.createElement("ul");
             //if (progressIconsLarge) {
                 divProgressItems.className = 'ou-progress-items';
             //} else {
@@ -606,9 +606,9 @@
      */
     function ou_status(response) {
         if (response.status >= 200 && response.status < 300) {
-            return Promise.resolve(response)
+            return Promise.resolve(response);
         } else {
-            return Promise.reject(new Error(response.statusText))
+            return Promise.reject(new Error(response.statusText));
         }
     }
     /*
@@ -694,13 +694,16 @@
      * @param {HTMLElement } newNode - the node to be inserted
      * @param {HTMLElement } referenceNode - the node after which newNode will be inserted
      */
+    /* - NOT CURRENTLY USED
     function ou_insertAfter(newNode, referenceNode) {
         referenceNode.parentNode.insertBefore(newNode, referenceNode.nextSibling);
     }
+    */
 
     /*
-     * Get self id - actually only needed to show completion - NOT CURRENTLY USED
+     * Get self id - actually only needed to show completion
      */
+    /* - NOT CURRENTLY USED
     function ou_getSelfThenModules() {
         fetch('/api/v1/users/self',{
                 method: 'GET',
@@ -720,5 +723,6 @@
             }
         );
     }
+    */
 
 })();
