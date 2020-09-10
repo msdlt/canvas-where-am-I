@@ -129,7 +129,7 @@
             })
             .then(ou_status)
             .then(ou_json)
-            .then(function(moduleArray) {
+            .then( function(moduleArray) {
                 // moduleArray contains an array of Module objects
                 // https://canvas.instructure.com/doc/api/modules.html#Module
                 // note - combining creation of lh modules sub-menu and Module tiles on Modules page to avoid repeated loops through data
@@ -137,7 +137,7 @@
                 var listUl = document.createElement('ul');  //the containing element for the modules sub-menu
                 listUl.className = 'ou-section-tabs-sub';
 
-                const isCourseHome = divContextModulesContainer && !initModuleId && divCourseHomeContent
+                const isCourseHome = divContextModulesContainer && !initModuleId && divCourseHomeContent;
                 if (isCourseHome) {
                     //only needed on all Modules page IF it is the home page
                     //first delete any existing nav container
@@ -158,9 +158,11 @@
                 }
 
                 //run through each module
-                moduleArray.forEach(function(module, mindex) {
+                moduleArray.forEach( function(module, mindex) {
 
-                    if(isCourseHome) {
+                    moduleItemsForProgress[module.id] = [];
+
+                    if (isCourseHome) {
                         //only needed on all Modules page
                         //create row for card
                         if(mindex % noOfColumnsPerRow === 0) {
@@ -220,12 +222,10 @@
                         */
                     }
 
-                    moduleItemsForProgress[module.id] = [];
-
                     //If we're on a page launched via Modules, initModuleItemId != 0 so or if we have launched the whole Modules page (ie need menu at top)
-                    if(initModuleItemId || isCourseHome) {
-                        module.items.forEach(function(item, iindex){
-                            if(item.type !== 'SubHeader') { //don't want these represented anywhere - on Modules tiles dropdowns OR in progress buttons
+                    if (initModuleItemId || isCourseHome) {
+                        module.items.forEach( function(item, iindex){
+                            if (item.type !== 'SubHeader') { //don't want these represented anywhere - on Modules tiles dropdowns OR in progress buttons
                                 //TODO factor in the number of Text Headers before calculating % complete
                                 //var progressAsPercentage = Math.round(((iindex+1)/module.items.length)*100);
 
@@ -241,7 +241,7 @@
                                 var itemId = item.id;
                                 var itemType = item.type;
                                 var iconType;
-                                switch(itemType) {
+                                switch (itemType) {
                                     case 'Page':
                                         iconType = 'icon-document';
                                         break;
@@ -263,6 +263,7 @@
                                     default:
                                         iconType = 'icon-document';
                                 }
+
                                 var listItem = document.createElement('li');
                                 listItem.className = 'ou-menu-item-wrapper';
 
@@ -275,6 +276,7 @@
                                     icon: iconType,
                                     current: isCurrentItem
                                 };
+
                                 moduleItemsForProgress[module.id][iindex] = tempNavObj;
 
                                 /*
@@ -306,7 +308,7 @@
                         });
                     }
 
-                    if(isCourseHome) {
+                    if (isCourseHome) {
                         //only needed on all Modules page
 
                         var moduleTileTitle = document.createElement('div');
@@ -355,7 +357,7 @@
                         newLink.classList.add('ou-multiline');
                     }
                     //check if we need to make one of our sub-menu modules active
-                    if((initModuleItemId && moduleIdByModuleItemId[initModuleItemId] && moduleIdByModuleItemId[initModuleItemId].moduleId && moduleIdByModuleItemId[initModuleItemId].moduleId==module.id) || (initModuleId && initModuleId==parseInt(module.id))) {
+                    if ((initModuleItemId && moduleIdByModuleItemId[initModuleItemId] && moduleIdByModuleItemId[initModuleItemId].moduleId && moduleIdByModuleItemId[initModuleItemId].moduleId==module.id) || (initModuleId && initModuleId==parseInt(module.id))) {
                         //first unactivate all lh menu items
                         var sectionLinks = document.querySelectorAll('li.section > a.active'); //should only be one!
                         Array.prototype.forEach.call(sectionLinks, function(sectionLink, i){
@@ -416,7 +418,7 @@
     function ou_showProgressBar() {
         //can't get footer too early as getElementsByClassName doesn't seem to work as arly as byId
         var footerContents = document.getElementsByClassName('module-sequence-footer-content');
-        if(footerContents.length > 0) {
+        if (footerContents.length > 0) {
             divFooterContent = footerContents[0];
         }
 
@@ -452,7 +454,7 @@
 
             //first work out whether have enough room for the progress buttons - if not, show bar
             var progressIconsLarge = true;
-            if((moduleItemsForProgress[moduleIdByModuleItemId[initModuleItemId].moduleId].length * widthOfButton) > (divCentreCol.offsetWidth - widthOfCentreColPadding)) {
+            if ((moduleItemsForProgress[moduleIdByModuleItemId[initModuleItemId].moduleId].length * widthOfButton) > (divCentreCol.offsetWidth - widthOfCentreColPadding)) {
                 progressIconsLarge = false;
             }
 
@@ -470,7 +472,7 @@
             }
             */
 
-            moduleItemsForProgress[moduleIdByModuleItemId[initModuleItemId].moduleId].forEach(function(item, index) {
+            moduleItemsForProgress[moduleIdByModuleItemId[initModuleItemId].moduleId].forEach( function(item, index) {
                 var listItem = document.createElement('li');
                 var listItemLink = document.createElement('a');
                 if (progressIconsLarge) {
@@ -495,6 +497,7 @@
                 listItem.appendChild(listItemLink);
                 divProgressItems.appendChild(listItem);
             });
+
             divProgressIcons.appendChild(divProgressItems);
 
             //create bar version
@@ -519,7 +522,7 @@
             //look for Previous button
             var previousButton = document.querySelector('a.module-sequence-footer-button--previous');
             // var previousButtonTop;  //disabled at the moment as Canvas had very non-standard headers
-            if(previousButton) {
+            if (previousButton) {
                 divLeftCol.appendChild(previousButton);
                 /*
                 previousButtonTop = previousButton.cloneNode(true);
@@ -529,7 +532,7 @@
             //look for Next button
             var nextButton = document.querySelector('span.module-sequence-footer-button--next');
             //var nextButtonTop; //disabled at the moment as Canvas had very non-standard headers
-            if(nextButton) {
+            if (nextButton) {
                 divRightCol.appendChild(nextButton);
                 //nextButtonTop = nextButton.cloneNode(true);
                 //nextButtonTop.classList.add('ou-NextTop'); //make space on right
@@ -622,8 +625,7 @@
      * Gets the domain root account ID.
      */
     function ou_getDomainRootAccountId() {
-        var id = ENV.DOMAIN_ROOT_ACCOUNT_ID;
-        return id;
+        return ENV.DOMAIN_ROOT_ACCOUNT_ID;
     }
 
     /**
@@ -632,9 +634,9 @@
      */
     function ou_getCourseId() {
         var courseId = ENV.COURSE_ID || ENV.course_id;
-        if(!courseId){
+        if (!courseId) {
             var urlPartIncludingCourseId = window.location.href.split('courses/')[1];
-            if(urlPartIncludingCourseId) {
+            if (urlPartIncludingCourseId) {
                 courseId = urlPartIncludingCourseId.split('/')[0];
             }
         }
@@ -650,10 +652,10 @@
         var currentUrl = window.location.href;
         var moduleItemId = 0; //default to 0/not found
         var startPos = currentUrl.indexOf(moduleItemTerm); //is this in URL
-        if(startPos != -1) {
+        if (startPos != -1) {
             startPos = startPos + moduleItemTerm.length; //account for length of moduleItemTerm as found beginning position
             var finishPos = currentUrl.indexOf('&', startPos); //is there another query param after module_item_id=
-            if(finishPos == -1) {
+            if (finishPos == -1) {
                 finishPos = currentUrl.length;
             }
             moduleItemId = parseInt(currentUrl.slice(startPos, finishPos));
@@ -661,7 +663,7 @@
             //for external links at least, we have a URL in the format: /courses/13199/modules/items/87888 so let's seee if we can extract from that
             moduleItemTerm = '/modules/items/';
             startPos = currentUrl.indexOf(moduleItemTerm); //is this in URL
-            if(startPos != -1) {
+            if (startPos != -1) {
                 startPos = startPos + moduleItemTerm.length; //account for length of moduleItemTerm as found beginning position
                 moduleItemId = parseInt(currentUrl.slice(startPos)); //will substring from end
             }
@@ -678,7 +680,7 @@
         var currentUrl = window.location.href;
         var moduleId = 0; //default to 0/not found
         var startPos = currentUrl.indexOf(moduleIdTerm); //is this in URL
-        if(startPos != -1) {
+        if (startPos != -1) {
             startPos = startPos + moduleIdTerm.length; //account for length of moduleItemTerm as found beginning position
             moduleId = parseInt(currentUrl.slice(startPos)); //will substring from end
         }
