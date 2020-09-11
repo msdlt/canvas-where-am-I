@@ -1,3 +1,7 @@
-node_modules
+node_modules/
+.env*.local
+.DS_Store
+.npmrc
+.tmp/
 localhost-key.pem
 localhost.pem
