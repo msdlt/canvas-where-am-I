@@ -5,3 +5,5 @@ node_modules/
 .tmp/
 localhost-key.pem
 localhost.pem
+*.min.js
+*.min.css
