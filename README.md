@@ -32,6 +32,8 @@ You'll need admin rights in a subaccount to be able to upload the canvas-where-a
 2. Upload the canvas-where-am-I.css and canvas-where-am-I.js into the **CSS** and **JavaScript File** boxes for the **Canvas desktop application** only (it will not work on the student app).
 3. If you would like your Home page to display the tiles for each Module, set the Modules page as your Home page.
 
+**NOTE: We recommend uploading the minified versions of canvas-where-am-I.css and canvas-where-am-I.js, to minify them run the command 'npm run minify', the files will be named canvas-where-am-I.min.css and canvas-where-am-I.min.js.
+
 # Contributing
 I would be grateful for any help you can give with this. Some of the more obvious enhancements are in the 'Issues' for this repository. As well as these issues, there are some TODOs at the top of canvas-where-am-I.js.
 
