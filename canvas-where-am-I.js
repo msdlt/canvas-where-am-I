@@ -663,19 +663,16 @@
     }
 
     /**
-     * Function which gets find module id from URL - currently ONLY ON WEB
+     * Function which finds the module id from location hash - currently ONLY ON WEB
+     * Example /courses/28277/modules#module_545
      * @returns {int} id of module or 0 for not found
      */
     function ou_getModuleId() {
-        var moduleIdTerm = 'modules#module_';
-        var currentUrl = window.location.href;
-        var moduleId = 0; //default to 0/not found
-        var startPos = currentUrl.indexOf(moduleIdTerm); //is this in URL
-        if (startPos != -1) {
-            startPos = startPos + moduleIdTerm.length; //account for length of moduleItemTerm as found beginning position
-            moduleId = parseInt(currentUrl.slice(startPos)); //will substring from end
-        }
-        return moduleId;
+        const moduleHash = window.location.hash.substr(1);
+        const moduleHashPrefix = 'module_';
+        // If the module hash starts with the module_ prefix, remove the prefix to get the Id.
+        // Otherwise return 0, moduleId not found
+        return moduleHash.startsWith(moduleHashPrefix) ? moduleHash.replace(moduleHashPrefix, '') : 0;
     }
 
     /****************************************/
