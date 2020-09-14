@@ -5,7 +5,7 @@
 // TODO investigate whether we could limit Module titles in LH menu to e.g two lines
 // TODO can we refresh menu when editing Modules?
 
-(function () {  //method from: https://community.canvaslms.com/thread/22500-mobile-javascript-development
+(async function () {  //method from: https://community.canvaslms.com/thread/22500-mobile-javascript-development
 
     /****************************************/
     /**** Start of Configuration Section ****/
@@ -70,9 +70,24 @@
     /***** Start function main thread *******/
     /****************************************/
 
-    ou_CheckSettings();
-    // Enable this call for development purposes when the course settings file does not exist in the Amazon S3 Bucket.
-    // ou_domReady();
+    // We must abort if the script cant get the initCourseId or the initDomainId.
+    if (!initCourseId || !initDomainId) {
+      return;
+    }
+
+    const isTileViewEnabled = await ou_CheckSettings(initDomainId, initCourseId);
+    // Only perform the course presentation and navigation logic if it is enabled in the course CPN settings.
+    if (!isTileViewEnabled) {
+      return;
+    }
+
+    // We're inside a specific modules, hide the other Modules
+    if(initModuleId) {
+        ou_hideOtherModules(initModuleId);
+    }
+
+    ou_getModules(initCourseId);
+
 
     /****************************************/
     /***** End function main thread *********/
@@ -82,36 +97,23 @@
     /***** Start of function definitions ****/
     /****************************************/
 
-    /* Wait until DOM ready before processing */
-    function ou_domReady () {
-        //New LH menu navigation - show on ALL pages in course
-        if(initCourseId) {
-            if(initModuleId) {
-                // We're inside a specific modules, hide the other Modules
-                ou_hideOtherModules(initModuleId);
-            }
-            ou_getModules(initCourseId);
-        }
-    }
-
-    function ou_CheckSettings () {
-        if (initDomainId && initCourseId) {
-            const settingsFileRequestUrl = `${amazonS3bucketUrl}/${initDomainId}/${initCourseId}.json`;
-            fetch(settingsFileRequestUrl)
-              .then(ou_json)
-              .then(function(json) {
-                  if (json['modules-navigation']) {
-                      console.log('Modules Navigation: enabled');
-                      ou_domReady();
-                  } else {
-                      console.log('Modules Navigation: disabled');
-                  }
-              })
-              .catch(function(error) {
-                  console.log('Failed to load settings');
-              });
-
-        }
+    /*
+     * Checks if the CPN view is enabled requesting the CPN settings from the Amazon S3 bucket.
+     */
+    async function ou_CheckSettings(initDomainId, initCourseId) {
+      const settingsFileRequestUrl = `${amazonS3bucketUrl}/${initDomainId}/${initCourseId}.json`;
+      const isTileViewEnabled = await fetch(settingsFileRequestUrl)
+        .then(ou_json)
+        .then(function(json) {
+            const isTileViewEnabled = json['modules-navigation'];
+            console.log('Modules Navigation Enabled: ' + isTileViewEnabled);
+            return isTileViewEnabled;
+        })
+        .catch(function(error) {
+            console.log('Failed to load settings');
+            return false;
+        });
+        return isTileViewEnabled;
     }
 
     /*
