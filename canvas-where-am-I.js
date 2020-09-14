@@ -86,7 +86,8 @@
         ou_hideOtherModules(initModuleId);
     }
 
-    ou_getModules(initCourseId);
+    const courseModules = await ou_getModules(initCourseId);
+    ou_performLogic(courseModules);
 
 
     /****************************************/
@@ -117,303 +118,304 @@
     }
 
     /*
-     * Get modules for courseId
+     * Gets the module objects for a courseId querying the Canvas API.
+     * https://canvas.instructure.com/doc/api/modules.html#Module
      */
-    function ou_getModules(courseId) {
-        // Added &per_page=100, otherwise only returns the first 10
-        const moduleRequest = `/api/v1/courses/${courseId}/modules?include=items&per_page=100`;
-        fetch(moduleRequest, {
-                method: 'GET',
-                credentials: 'include',
-                headers: {
-                    'Accept': 'application/json',
-                }
-            })
-            .then(ou_status)
-            .then(ou_json)
-            .then( function(moduleArray) {
-                // moduleArray contains an array of Module objects
-                // https://canvas.instructure.com/doc/api/modules.html#Module
-                // note - combining creation of lh modules sub-menu and Module tiles on Modules page to avoid repeated loops through data
-                // set up some things before we begin going through Modules
-                var listUl = document.createElement('ul');  //the containing element for the modules sub-menu
-                listUl.className = 'ou-section-tabs-sub';
+    async function ou_getModules(courseId) {
+      // Added &per_page=100, otherwise only returns the first 10
+      const moduleRequest = `/api/v1/courses/${courseId}/modules?include=items&per_page=100`;
+      const courseModules = await fetch(moduleRequest, {
+        method: 'GET',
+        credentials: 'include',
+        headers: {
+          'Accept': 'application/json',
+        }
+      }).then(ou_status)
+      .then(ou_json)
+      .then((moduleArray) => {return moduleArray;})
+      .catch(function(error) {
+        console.log('Failed to get course modules', error);
+        return [];
+      });
+      return courseModules
+    }
 
-                const isCourseHome = divContextModulesContainer && !initModuleId && divCourseHomeContent;
-                if (isCourseHome) {
-                    //only needed on all Modules page IF it is the home page
-                    //first delete any existing nav container
-                    var existingModuleNav = document.getElementById('module_nav');
-                    if (existingModuleNav) {
-                        existingModuleNav.parentNode.removeChild(existingModuleNav);
-                    }
-                    //create our nav container
-                    moduleNav = document.createElement('div');
-                    moduleNav.id = 'module_nav';
-                    moduleNav.className = 'ou-ModuleCard__box';
-                    moduleNav.innerHTML = '<a id="module_nav_anchor"></a>';
-                    divContent.insertBefore(moduleNav, divContent.childNodes[0]); //insert moduleNav onto page
+    function ou_performLogic (moduleArray) {
+      // moduleArray contains an array of Module objects
+      // note - combining creation of lh modules sub-menu and Module tiles on Modules page to avoid repeated loops through data
+      // set up some things before we begin going through Modules
+      var listUl = document.createElement('ul');  //the containing element for the modules sub-menu
+      listUl.className = 'ou-section-tabs-sub';
 
-                    divCourseHomeContent.style.display = 'none';
+      const isCourseHome = divContextModulesContainer && !initModuleId && divCourseHomeContent;
+      if (isCourseHome) {
+          //only needed on all Modules page IF it is the home page
+          //first delete any existing nav container
+          var existingModuleNav = document.getElementById('module_nav');
+          if (existingModuleNav) {
+              existingModuleNav.parentNode.removeChild(existingModuleNav);
+          }
+          //create our nav container
+          moduleNav = document.createElement('div');
+          moduleNav.id = 'module_nav';
+          moduleNav.className = 'ou-ModuleCard__box';
+          moduleNav.innerHTML = '<a id="module_nav_anchor"></a>';
+          divContent.insertBefore(moduleNav, divContent.childNodes[0]); //insert moduleNav onto page
 
-                    var newRow; //store parent row to append to between iterations
-                }
+          divCourseHomeContent.style.display = 'none';
 
-                //run through each module
-                moduleArray.forEach( function(module, mindex) {
+          var newRow; //store parent row to append to between iterations
+      }
 
-                    moduleItemsForProgress[module.id] = [];
+      //run through each module
+      moduleArray.forEach( function(module, mindex) {
 
-                    if (isCourseHome) {
-                        //only needed on all Modules page
-                        //create row for card
-                        if(mindex % noOfColumnsPerRow === 0) {
-                            newRow = document.createElement('div');
-                            newRow.className = 'grid-row center-sm';
-                            moduleNav.appendChild(newRow);
-                        }
+          moduleItemsForProgress[module.id] = [];
 
-                        var newColumn = document.createElement('div');
+          if (isCourseHome) {
+              //only needed on all Modules page
+              //create row for card
+              if(mindex % noOfColumnsPerRow === 0) {
+                  newRow = document.createElement('div');
+                  newRow.className = 'grid-row center-sm';
+                  moduleNav.appendChild(newRow);
+              }
 
-                        // create column wrapper
-                        newColumn.className = 'col-xs-12 col-sm-6 col-lg-3'; //TODO work out classes for noOfColumnsPerRow != 4
-                        newRow.appendChild(newColumn);
+              var newColumn = document.createElement('div');
 
-                        //create module div
-                        var moduleTile = document.createElement('div');
-                        moduleTile.className = 'ou-ModuleCard';
-                        moduleTile.title = module.name;
+              // create column wrapper
+              newColumn.className = 'col-xs-12 col-sm-6 col-lg-3'; //TODO work out classes for noOfColumnsPerRow != 4
+              newRow.appendChild(newColumn);
 
-                        var moduleTileLink = document.createElement('a');
-                        moduleTileLink.href = `/courses/${initCourseId}/modules/${module.id}`;
+              //create module div
+              var moduleTile = document.createElement('div');
+              moduleTile.className = 'ou-ModuleCard';
+              moduleTile.title = module.name;
 
-                        var moduleTileHeader = document.createElement('div');
-                        moduleTileHeader.className = 'ou-ModuleCard__header_hero_short';
-                        moduleTileHeader.style.backgroundColor = moduleColours[mindex];
+              var moduleTileLink = document.createElement('a');
+              moduleTileLink.href = `/courses/${initCourseId}/modules/${module.id}`;
 
-                        var moduleTileContent = document.createElement('div');
-                        moduleTileContent.className = 'ou-ModuleCard__header_content';
+              var moduleTileHeader = document.createElement('div');
+              moduleTileHeader.className = 'ou-ModuleCard__header_hero_short';
+              moduleTileHeader.style.backgroundColor = moduleColours[mindex];
 
-                        /*
-                        if(showItemLinks && module.items.length > 0) {
-                            //don't add drop-down if not showItemLinks or if no items in Module
-                            var moduleTileActions = document.createElement('div');
-                            moduleTileActions.className = 'ou-drop-down-arrow';
-                            moduleTileActions.title = 'Click for contents';
+              var moduleTileContent = document.createElement('div');
+              moduleTileContent.className = 'ou-ModuleCard__header_content';
 
-                            var moduleTileArrowButton = document.createElement('a');
-                            moduleTileArrowButton.classList.add('al-trigger');
-                            moduleTileArrowButton.setAttribute('menu-to-show', 'items-menu-' + module.id);
-                            moduleTileArrowButton.href ='#';
+              /*
+              if(showItemLinks && module.items.length > 0) {
+                  //don't add drop-down if not showItemLinks or if no items in Module
+                  var moduleTileActions = document.createElement('div');
+                  moduleTileActions.className = 'ou-drop-down-arrow';
+                  moduleTileActions.title = 'Click for contents';
 
-                            var moduleTileArrowIcon = document.createElement('i');
-                            moduleTileArrowIcon.className = 'icon-mini-arrow-down';
-                            moduleTileArrowIcon.setAttribute('menu-to-show', 'items-menu-' + module.id);
+                  var moduleTileArrowButton = document.createElement('a');
+                  moduleTileArrowButton.classList.add('al-trigger');
+                  moduleTileArrowButton.setAttribute('menu-to-show', 'items-menu-' + module.id);
+                  moduleTileArrowButton.href ='#';
 
-                            moduleTileArrowButton.appendChild(moduleTileArrowIcon);
+                  var moduleTileArrowIcon = document.createElement('i');
+                  moduleTileArrowIcon.className = 'icon-mini-arrow-down';
+                  moduleTileArrowIcon.setAttribute('menu-to-show', 'items-menu-' + module.id);
 
-                            var moduleTileList = document.createElement('ul');
-                            moduleTileList.id = 'toolbar-' + module.id + '-0';
-                            moduleTileList.className = 'ou-menu-items-list';
-                            moduleTileList.setAttribute('role', 'menu');
-                            moduleTileList.tabIndex = 0;
-                            moduleTileList.setAttribute('aria-hidden',true);
-                            moduleTileList.setAttribute('aria-expanded',false);
-                            moduleTileList.setAttribute('aria-activedescendant','toolbar-' + module.id + '-1');
-                        }
-                        */
-                    }
+                  moduleTileArrowButton.appendChild(moduleTileArrowIcon);
 
-                    //If we're on a page launched via Modules, initModuleItemId != 0 so or if we have launched the whole Modules page (ie need menu at top)
-                    if (initModuleItemId || isCourseHome) {
-                        module.items.forEach( function(item, iindex){
-                            if (item.type !== 'SubHeader') { //don't want these represented anywhere - on Modules tiles dropdowns OR in progress buttons
-                                //TODO factor in the number of Text Headers before calculating % complete
-                                //var progressAsPercentage = Math.round(((iindex+1)/module.items.length)*100);
+                  var moduleTileList = document.createElement('ul');
+                  moduleTileList.id = 'toolbar-' + module.id + '-0';
+                  moduleTileList.className = 'ou-menu-items-list';
+                  moduleTileList.setAttribute('role', 'menu');
+                  moduleTileList.tabIndex = 0;
+                  moduleTileList.setAttribute('aria-hidden',true);
+                  moduleTileList.setAttribute('aria-expanded',false);
+                  moduleTileList.setAttribute('aria-activedescendant','toolbar-' + module.id + '-1');
+              }
+              */
+          }
 
-                                var tempObj = {
-                                    moduleId: item.module_id,
-                                    moduleName: module.name/*,
-                                    progress: progressAsPercentage */
-                                };
+          //If we're on a page launched via Modules, initModuleItemId != 0 so or if we have launched the whole Modules page (ie need menu at top)
+          if (initModuleItemId || isCourseHome) {
+              module.items.forEach( function(item, iindex){
+                  if (item.type !== 'SubHeader') { //don't want these represented anywhere - on Modules tiles dropdowns OR in progress buttons
+                      //TODO factor in the number of Text Headers before calculating % complete
+                      //var progressAsPercentage = Math.round(((iindex+1)/module.items.length)*100);
 
-                                moduleIdByModuleItemId[parseInt(item.id)] = tempObj; //for deciding which sub-module on lh menu is active
+                      var tempObj = {
+                          moduleId: item.module_id,
+                          moduleName: module.name/*,
+                          progress: progressAsPercentage */
+                      };
 
-                                // var itemTitle = item.title;
-                                var itemId = item.id;
-                                var itemType = item.type;
-                                var iconType;
-                                switch (itemType) {
-                                    case 'Page':
-                                        iconType = 'icon-document';
-                                        break;
-                                    case 'File':
-                                        iconType = 'icon-paperclip';
-                                        break;
-                                    case 'Discussion':
-                                        iconType = 'icon-discussion';
-                                        break;
-                                    case 'Quiz':
-                                        iconType = 'icon-quiz';
-                                        break;
-                                    case 'Assignment':
-                                        iconType = 'icon-assignment';
-                                        break;
-                                    case 'ExternalUrl':
-                                        iconType = 'icon-link';
-                                        break;
-                                    default:
-                                        iconType = 'icon-document';
-                                }
+                      moduleIdByModuleItemId[parseInt(item.id)] = tempObj; //for deciding which sub-module on lh menu is active
 
-                                var listItem = document.createElement('li');
-                                listItem.className = 'ou-menu-item-wrapper';
+                      // var itemTitle = item.title;
+                      var itemId = item.id;
+                      var itemType = item.type;
+                      var iconType;
+                      switch (itemType) {
+                          case 'Page':
+                              iconType = 'icon-document';
+                              break;
+                          case 'File':
+                              iconType = 'icon-paperclip';
+                              break;
+                          case 'Discussion':
+                              iconType = 'icon-discussion';
+                              break;
+                          case 'Quiz':
+                              iconType = 'icon-quiz';
+                              break;
+                          case 'Assignment':
+                              iconType = 'icon-assignment';
+                              break;
+                          case 'ExternalUrl':
+                              iconType = 'icon-link';
+                              break;
+                          default:
+                              iconType = 'icon-document';
+                      }
 
-                                const listItemDest = `/courses/${initCourseId}/modules/items/${itemId}`;
-                                // note only want to do this for current module
-                                var isCurrentItem = parseInt(initModuleItemId) == parseInt(item.id);
-                                var tempNavObj = {
-                                    href: listItemDest,
-                                    title: item.title,
-                                    icon: iconType,
-                                    current: isCurrentItem
-                                };
+                      var listItem = document.createElement('li');
+                      listItem.className = 'ou-menu-item-wrapper';
 
-                                moduleItemsForProgress[module.id][iindex] = tempNavObj;
+                      const listItemDest = `/courses/${initCourseId}/modules/items/${itemId}`;
+                      // note only want to do this for current module
+                      var isCurrentItem = parseInt(initModuleItemId) == parseInt(item.id);
+                      var tempNavObj = {
+                          href: listItemDest,
+                          title: item.title,
+                          icon: iconType,
+                          current: isCurrentItem
+                      };
 
-                                /*
-                                var listItemLink = document.createElement('a');
-                                listItemLink.className = iconType;
-                                listItemLink.href = listItemDest;
-                                listItemLink.text = itemTitle;
-                                listItemLink.tabindex = -1;
-                                listItemLink.setAttribute('role', 'menuitem');
-                                listItemLink.title = itemTitle;
+                      moduleItemsForProgress[module.id][iindex] = tempNavObj;
 
-                                listItem.appendChild(listItemLink);
+                      /*
+                      var listItemLink = document.createElement('a');
+                      listItemLink.className = iconType;
+                      listItemLink.href = listItemDest;
+                      listItemLink.text = itemTitle;
+                      listItemLink.tabindex = -1;
+                      listItemLink.setAttribute('role', 'menuitem');
+                      listItemLink.title = itemTitle;
 
-                                if(divContextModulesContainer && showItemLinks) {
-                                    moduleTileList.appendChild(listItem);
-                                } else {
-                                    //note only want to do this for current module
-                                    var isCurrentItem = parseInt(initModuleItemId) == parseInt(item.id);
-                                    var tempNavObj = {
-                                        href: listItemDest,
-                                        title: item.title,
-                                        icon: iconType,
-                                        current: isCurrentItem
-                                    };
-                                    moduleItemsForProgress[module.id][iindex] = tempNavObj;
-                                }
-                                */
-                            }
-                        });
-                    }
+                      listItem.appendChild(listItemLink);
 
-                    if (isCourseHome) {
-                        //only needed on all Modules page
+                      if(divContextModulesContainer && showItemLinks) {
+                          moduleTileList.appendChild(listItem);
+                      } else {
+                          //note only want to do this for current module
+                          var isCurrentItem = parseInt(initModuleItemId) == parseInt(item.id);
+                          var tempNavObj = {
+                              href: listItemDest,
+                              title: item.title,
+                              icon: iconType,
+                              current: isCurrentItem
+                          };
+                          moduleItemsForProgress[module.id][iindex] = tempNavObj;
+                      }
+                      */
+                  }
+              });
+          }
 
-                        var moduleTileTitle = document.createElement('div');
-                        moduleTileTitle.classList.add('ou-ModuleCard__header-title');
-                        moduleTileTitle.classList.add('ellipsis');
-                        moduleTileTitle.title = module.name;
-                        moduleTileTitle.style.color = moduleColours[mindex];
-                        moduleTileTitle.innerHTML = module.name;
-                        //only leave space for actions if we're adding them
-                        moduleTileTitle.classList.add('ou-no-actions');
+          if (isCourseHome) {
+              //only needed on all Modules page
 
-                        /*
-                        if(showItemLinks && module.items.length > 0) {
-                            //only add actions if required
-                            moduleTileActions.appendChild(moduleTileArrowButton);
+              var moduleTileTitle = document.createElement('div');
+              moduleTileTitle.classList.add('ou-ModuleCard__header-title');
+              moduleTileTitle.classList.add('ellipsis');
+              moduleTileTitle.title = module.name;
+              moduleTileTitle.style.color = moduleColours[mindex];
+              moduleTileTitle.innerHTML = module.name;
+              //only leave space for actions if we're adding them
+              moduleTileTitle.classList.add('ou-no-actions');
 
-                            var rowForItems = document.createElement('div');
-                            rowForItems.className = 'grid-row center-sm ou-items-menu';
-                            rowForItems.id = 'items-menu-' + module.id;
-                            ou_insertAfter(rowForItems, newRow);
-                            rowForItems.appendChild(moduleTileList);
-                            //moduleTileActions.appendChild(moduleTileList);
-                            moduleTileContent.appendChild(moduleTileActions);
-                        } else {
-                            //only leave space for actions if we're adding them
-                            moduleTileTitle.classList.add('ou-no-actions');
-                        }
-                        */
+              /*
+              if(showItemLinks && module.items.length > 0) {
+                  //only add actions if required
+                  moduleTileActions.appendChild(moduleTileArrowButton);
 
-                        moduleTileContent.appendChild(moduleTileTitle);
-                        moduleTileLink.appendChild(moduleTileHeader);
-                        moduleTileLink.appendChild(moduleTileContent);
-                        moduleTile.appendChild(moduleTileLink);
-                        newColumn.appendChild(moduleTile);
-                    }
+                  var rowForItems = document.createElement('div');
+                  rowForItems.className = 'grid-row center-sm ou-items-menu';
+                  rowForItems.id = 'items-menu-' + module.id;
+                  ou_insertAfter(rowForItems, newRow);
+                  rowForItems.appendChild(moduleTileList);
+                  //moduleTileActions.appendChild(moduleTileList);
+                  moduleTileContent.appendChild(moduleTileActions);
+              } else {
+                  //only leave space for actions if we're adding them
+                  moduleTileTitle.classList.add('ou-no-actions');
+              }
+              */
 
-                    //LH MENU
-                    //create li
-                    var newItem = document.createElement('li');
-                    newItem.className = 'ou-section-sub';
-                    listUl.appendChild(newItem);
-                    //create a
-                    var newLink = document.createElement('a');
-                    newLink.className = 'ou-section-link-sub'; //Note set active if necessary
-                    if (allowMultilineModuleTitles) {
-                        newLink.classList.add('ou-multiline');
-                    }
-                    //check if we need to make one of our sub-menu modules active
-                    if ((initModuleItemId && moduleIdByModuleItemId[initModuleItemId] && moduleIdByModuleItemId[initModuleItemId].moduleId && moduleIdByModuleItemId[initModuleItemId].moduleId==module.id) || (initModuleId && initModuleId==parseInt(module.id))) {
-                        //first unactivate all lh menu items
-                        var sectionLinks = document.querySelectorAll('li.section > a.active'); //should only be one!
-                        Array.prototype.forEach.call(sectionLinks, function(sectionLink, i){
-                            //code to remove active from here: http://youmightnotneedjquery.com/
-                            var classNameToRemove = 'active';
-                            if (sectionLink.classList) {
-                                sectionLink.classList.remove(classNameToRemove);
-                            } else {
-                                sectionLink.className = sectionLink.className.replace(new RegExp('(^|\\b)' + classNameToRemove.split(' ').join('|') + '(\\b|$)', 'gi'), ' ');
-                            }
-                        });
-                        newLink.classList.add('active');  //make current Module active
-                    }
-                    newLink.title = module.name;
-                    newLink.href = '/courses/' + courseId + '/modules/' + module.id;
-                    newLink.innerHTML = module.name;
-                    newItem.appendChild(newLink);
-                });
+              moduleTileContent.appendChild(moduleTileTitle);
+              moduleTileLink.appendChild(moduleTileHeader);
+              moduleTileLink.appendChild(moduleTileContent);
+              moduleTile.appendChild(moduleTileLink);
+              newColumn.appendChild(moduleTile);
+          }
 
-                // Add the list of modules to the LHS menu if the list item is visible.
-                if (lhsModulesListItem) {
-                  lhsModulesListItem.appendChild(listUl);
-                }
+          //LH MENU
+          //create li
+          var newItem = document.createElement('li');
+          newItem.className = 'ou-section-sub';
+          listUl.appendChild(newItem);
+          //create a
+          var newLink = document.createElement('a');
+          newLink.className = 'ou-section-link-sub'; //Note set active if necessary
+          if (allowMultilineModuleTitles) {
+              newLink.classList.add('ou-multiline');
+          }
+          //check if we need to make one of our sub-menu modules active
+          if ((initModuleItemId && moduleIdByModuleItemId[initModuleItemId] && moduleIdByModuleItemId[initModuleItemId].moduleId && moduleIdByModuleItemId[initModuleItemId].moduleId==module.id) || (initModuleId && initModuleId==parseInt(module.id))) {
+              //first unactivate all lh menu items
+              var sectionLinks = document.querySelectorAll('li.section > a.active'); //should only be one!
+              Array.prototype.forEach.call(sectionLinks, function(sectionLink, i){
+                  //code to remove active from here: http://youmightnotneedjquery.com/
+                  var classNameToRemove = 'active';
+                  if (sectionLink.classList) {
+                      sectionLink.classList.remove(classNameToRemove);
+                  } else {
+                      sectionLink.className = sectionLink.className.replace(new RegExp('(^|\\b)' + classNameToRemove.split(' ').join('|') + '(\\b|$)', 'gi'), ' ');
+                  }
+              });
+              newLink.classList.add('active');  //make current Module active
+          }
+          newLink.title = module.name;
+          newLink.href = '/courses/' + initCourseId + '/modules/' + module.id;
+          newLink.innerHTML = module.name;
+          newItem.appendChild(newLink);
+      });
 
-                //now add Progress Bar
-                setTimeout(ou_showProgressBar, 100); //timeout to ensure all elements have really loaded before running
+      // Add the list of modules to the LHS menu if the list item is visible.
+      if (lhsModulesListItem) {
+        lhsModulesListItem.appendChild(listUl);
+      }
 
-                //click event listener for module tile buttons
-                /*
-                document.addEventListener('click', function (event) {
-                    if (!event.target.getAttribute('menu-to-show')) return;
-                    // Don't follow the link
-                    event.preventDefault();
-                    ou_handleArrowPress(event.target);
+      //now add Progress Bar
+      setTimeout(ou_showProgressBar, 100); //timeout to ensure all elements have really loaded before running
 
-                }, false);
+      //click event listener for module tile buttons
+      /*
+      document.addEventListener('click', function (event) {
+          if (!event.target.getAttribute('menu-to-show')) return;
+          // Don't follow the link
+          event.preventDefault();
+          ou_handleArrowPress(event.target);
 
-                document.addEventListener('keydown', function (event) {
-                    if (event.target.getAttribute('menu-to-show')) {
-                        if (event.keyCode == 13 || event.keyCode == 32 || event.keyCode == 38 || event.keyCode == 40) {
-                            event.preventDefault();
-                            event.stopPropagation();
-                            ou_handleArrowPress(event.target);
-                            return false;
-                        }
-                    }
-                }, false);
-                */
+      }, false);
 
-            })
-            .catch(function(error) {
-                console.log('ou_getModules request failed', error);
-            }
-        );
+      document.addEventListener('keydown', function (event) {
+          if (event.target.getAttribute('menu-to-show')) {
+              if (event.keyCode == 13 || event.keyCode == 32 || event.keyCode == 38 || event.keyCode == 40) {
+                  event.preventDefault();
+                  event.stopPropagation();
+                  ou_handleArrowPress(event.target);
+                  return false;
+              }
+          }
+      }, false);
+      */
     }
 
     /*
