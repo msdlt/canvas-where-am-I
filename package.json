@@ -5,7 +5,8 @@
   "main": "",
   "scripts": {
     "test": "jest",
-    "start": "http-server -p 3001 -S -C localhost.pem -K localhost-key.pem"
+    "start": "http-server -p 3001 -S -C localhost.pem -K localhost-key.pem",
+    "minify": "minify canvas-where-am-I.js --out-file canvas-where-am-I.min.js --mangle.keepClassName && cleancss -o canvas-where-am-I.min.css canvas-where-am-I.css"
   },
   "repository": {
     "type": "git",
@@ -19,6 +20,8 @@
   "homepage": "https://github.com/oxctl/canvas-where-am-I#readme",
   "devDependencies": {
     "axios": "^0.20.0",
+    "babel-minify": "^0.5.1",
+    "clean-css-cli": "^4.3.0",
     "dotenv": "^8.2.0",
     "http-server": "^0.12.3",
     "jest": "^26.4.2",
