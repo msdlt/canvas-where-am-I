@@ -39,8 +39,8 @@
 
     /* DOM elements to check for */
     // The structure hierarchy in Canvas is content > course_home_content > context_modules_sortable_container
-    var divCourseHomeContent = document.getElementById('course_home_content');  //is this page Home
-    var divContent = document.getElementById('content');
+    const divCourseHomeContent = document.getElementById('course_home_content');  //is this page Home
+    const divContent = document.getElementById('content');
     const divContextModulesContainer = document.getElementById('context_modules_sortable_container');  //are we on the Modules page
     // Contains the Modules link in the LHS Menu (left hand side).
     // This doesn't match if the modules page is hidden for the students.
@@ -49,7 +49,6 @@
     const lhsModulesListItem = lhsModulesLink ? lhsModulesLink.parentNode : null
 
     /* Global variables */
-    var moduleNav;
     var divFooterContent;
 
     /* Working out and storing where we are in Course */
@@ -87,7 +86,13 @@
     }
 
     const courseModules = await ou_getModules(initCourseId);
-    ou_performLogic(courseModules);
+    const isCourseHome = divContextModulesContainer && !initModuleId && divCourseHomeContent;
+    // If the user is in the course home and contains modules, replace the standard view by the tile view.
+    if (isCourseHome) {
+      ou_replaceStandardByTileView(courseModules, divContent, divCourseHomeContent);
+    }
+
+    ou_performLogic(courseModules, isCourseHome);
 
 
     /****************************************/
@@ -140,6 +145,77 @@
       return courseModules
     }
 
+    /*
+     * Replaces the standard view of the course home modules by the tile view.
+     */
+    function ou_replaceStandardByTileView(moduleArray, contentDiv, homeContentDiv) {
+      // Hide the current home content div.
+      homeContentDiv.style.display = 'none';
+
+      const moduleNavId = 'module_nav';
+      //First delete any existing nav container
+      let existingModuleNav = document.getElementById(moduleNavId);
+      if (existingModuleNav) {
+          existingModuleNav.parentNode.removeChild(existingModuleNav);
+      }
+      //Create our nav container
+      let moduleNav = document.createElement('div');
+      moduleNav.id = moduleNavId;
+      moduleNav.className = 'ou-ModuleCard__box';
+      moduleNav.innerHTML = '<a id="module_nav_anchor"></a>';
+      // Insert moduleNav onto page
+      contentDiv.insertBefore(moduleNav, contentDiv.childNodes[0]);
+
+      let newRow;
+      moduleArray.forEach((module, mindex) => {
+        //create row for card
+        if (mindex % noOfColumnsPerRow === 0) {
+            newRow = document.createElement('div');
+            newRow.className = 'grid-row center-sm';
+            moduleNav.appendChild(newRow);
+        }
+
+        var newColumn = document.createElement('div');
+
+        // create column wrapper
+        newColumn.className = 'col-xs-12 col-sm-6 col-lg-3'; //TODO work out classes for noOfColumnsPerRow != 4
+        newRow.appendChild(newColumn);
+
+        //create module div
+        let moduleTile = document.createElement('div');
+        moduleTile.className = 'ou-ModuleCard';
+        moduleTile.title = module.name;
+
+        let moduleTileLink = document.createElement('a');
+        moduleTileLink.href = `/courses/${initCourseId}/modules/${module.id}`;
+
+        let moduleTileHeader = document.createElement('div');
+        moduleTileHeader.className = 'ou-ModuleCard__header_hero_short';
+        moduleTileHeader.style.backgroundColor = moduleColours[mindex];
+
+        let moduleTileContent = document.createElement('div');
+        moduleTileContent.className = 'ou-ModuleCard__header_content';
+
+        var moduleTileTitle = document.createElement('div');
+        moduleTileTitle.classList.add('ou-ModuleCard__header-title');
+        moduleTileTitle.classList.add('ellipsis');
+        moduleTileTitle.title = module.name;
+        moduleTileTitle.style.color = moduleColours[mindex];
+        moduleTileTitle.innerHTML = module.name;
+
+        // Only leave space for actions if we're adding them
+        moduleTileTitle.classList.add('ou-no-actions');
+
+        moduleTileContent.appendChild(moduleTileTitle);
+        moduleTileLink.appendChild(moduleTileHeader);
+        moduleTileLink.appendChild(moduleTileContent);
+        moduleTile.appendChild(moduleTileLink);
+        newColumn.appendChild(moduleTile);
+
+      });
+
+    }
+
     function ou_performLogic (moduleArray) {
       // moduleArray contains an array of Module objects
       // note - combining creation of lh modules sub-menu and Module tiles on Modules page to avoid repeated loops through data
@@ -147,90 +223,10 @@
       var listUl = document.createElement('ul');  //the containing element for the modules sub-menu
       listUl.className = 'ou-section-tabs-sub';
 
-      const isCourseHome = divContextModulesContainer && !initModuleId && divCourseHomeContent;
-      if (isCourseHome) {
-          //only needed on all Modules page IF it is the home page
-          //first delete any existing nav container
-          var existingModuleNav = document.getElementById('module_nav');
-          if (existingModuleNav) {
-              existingModuleNav.parentNode.removeChild(existingModuleNav);
-          }
-          //create our nav container
-          moduleNav = document.createElement('div');
-          moduleNav.id = 'module_nav';
-          moduleNav.className = 'ou-ModuleCard__box';
-          moduleNav.innerHTML = '<a id="module_nav_anchor"></a>';
-          divContent.insertBefore(moduleNav, divContent.childNodes[0]); //insert moduleNav onto page
-
-          divCourseHomeContent.style.display = 'none';
-
-          var newRow; //store parent row to append to between iterations
-      }
-
       //run through each module
       moduleArray.forEach( function(module, mindex) {
 
           moduleItemsForProgress[module.id] = [];
-
-          if (isCourseHome) {
-              //only needed on all Modules page
-              //create row for card
-              if(mindex % noOfColumnsPerRow === 0) {
-                  newRow = document.createElement('div');
-                  newRow.className = 'grid-row center-sm';
-                  moduleNav.appendChild(newRow);
-              }
-
-              var newColumn = document.createElement('div');
-
-              // create column wrapper
-              newColumn.className = 'col-xs-12 col-sm-6 col-lg-3'; //TODO work out classes for noOfColumnsPerRow != 4
-              newRow.appendChild(newColumn);
-
-              //create module div
-              var moduleTile = document.createElement('div');
-              moduleTile.className = 'ou-ModuleCard';
-              moduleTile.title = module.name;
-
-              var moduleTileLink = document.createElement('a');
-              moduleTileLink.href = `/courses/${initCourseId}/modules/${module.id}`;
-
-              var moduleTileHeader = document.createElement('div');
-              moduleTileHeader.className = 'ou-ModuleCard__header_hero_short';
-              moduleTileHeader.style.backgroundColor = moduleColours[mindex];
-
-              var moduleTileContent = document.createElement('div');
-              moduleTileContent.className = 'ou-ModuleCard__header_content';
-
-              /*
-              if(showItemLinks && module.items.length > 0) {
-                  //don't add drop-down if not showItemLinks or if no items in Module
-                  var moduleTileActions = document.createElement('div');
-                  moduleTileActions.className = 'ou-drop-down-arrow';
-                  moduleTileActions.title = 'Click for contents';
-
-                  var moduleTileArrowButton = document.createElement('a');
-                  moduleTileArrowButton.classList.add('al-trigger');
-                  moduleTileArrowButton.setAttribute('menu-to-show', 'items-menu-' + module.id);
-                  moduleTileArrowButton.href ='#';
-
-                  var moduleTileArrowIcon = document.createElement('i');
-                  moduleTileArrowIcon.className = 'icon-mini-arrow-down';
-                  moduleTileArrowIcon.setAttribute('menu-to-show', 'items-menu-' + module.id);
-
-                  moduleTileArrowButton.appendChild(moduleTileArrowIcon);
-
-                  var moduleTileList = document.createElement('ul');
-                  moduleTileList.id = 'toolbar-' + module.id + '-0';
-                  moduleTileList.className = 'ou-menu-items-list';
-                  moduleTileList.setAttribute('role', 'menu');
-                  moduleTileList.tabIndex = 0;
-                  moduleTileList.setAttribute('aria-hidden',true);
-                  moduleTileList.setAttribute('aria-expanded',false);
-                  moduleTileList.setAttribute('aria-activedescendant','toolbar-' + module.id + '-1');
-              }
-              */
-          }
 
           //If we're on a page launched via Modules, initModuleItemId != 0 so or if we have launched the whole Modules page (ie need menu at top)
           if (initModuleItemId || isCourseHome) {
@@ -316,43 +312,6 @@
                       */
                   }
               });
-          }
-
-          if (isCourseHome) {
-              //only needed on all Modules page
-
-              var moduleTileTitle = document.createElement('div');
-              moduleTileTitle.classList.add('ou-ModuleCard__header-title');
-              moduleTileTitle.classList.add('ellipsis');
-              moduleTileTitle.title = module.name;
-              moduleTileTitle.style.color = moduleColours[mindex];
-              moduleTileTitle.innerHTML = module.name;
-              //only leave space for actions if we're adding them
-              moduleTileTitle.classList.add('ou-no-actions');
-
-              /*
-              if(showItemLinks && module.items.length > 0) {
-                  //only add actions if required
-                  moduleTileActions.appendChild(moduleTileArrowButton);
-
-                  var rowForItems = document.createElement('div');
-                  rowForItems.className = 'grid-row center-sm ou-items-menu';
-                  rowForItems.id = 'items-menu-' + module.id;
-                  ou_insertAfter(rowForItems, newRow);
-                  rowForItems.appendChild(moduleTileList);
-                  //moduleTileActions.appendChild(moduleTileList);
-                  moduleTileContent.appendChild(moduleTileActions);
-              } else {
-                  //only leave space for actions if we're adding them
-                  moduleTileTitle.classList.add('ou-no-actions');
-              }
-              */
-
-              moduleTileContent.appendChild(moduleTileTitle);
-              moduleTileLink.appendChild(moduleTileHeader);
-              moduleTileLink.appendChild(moduleTileContent);
-              moduleTile.appendChild(moduleTileLink);
-              newColumn.appendChild(moduleTile);
           }
 
           //LH MENU
