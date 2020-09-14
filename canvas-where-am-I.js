@@ -92,6 +92,11 @@
       ou_replaceStandardByTileView(courseModules, divContent, divCourseHomeContent);
     }
 
+    // Add the submenu of modules to the LHS menu if the modules list item is visible.
+    if (lhsModulesListItem) {
+      ou_buildModulesSubmenu(courseModules, lhsModulesListItem, initCourseId, initModuleId, initModuleItemId, allowMultilineModuleTitles);
+    }
+
     ou_performLogic(courseModules, isCourseHome);
 
 
@@ -216,15 +221,57 @@
 
     }
 
-    function ou_performLogic (moduleArray) {
+    /*
+     * Builds the modules submenu adding all the modules as children of the Modules tool.
+     */
+    function ou_buildModulesSubmenu(moduleArray, moduleListItem, courseId, moduleId, moduleItemId, allowMultipleModuleTitles) {
+      // The containing element for the modules sub-menu
+      let moduleSubmenuList = document.createElement('ul');
+      moduleSubmenuList.className = 'ou-section-tabs-sub';
+
+      moduleArray.forEach((module, mindex) => {
+        // Create a new item for the submodule list.
+        let newItem = document.createElement('li');
+        newItem.className = 'ou-section-sub';
+
+        // Create a new Link for the submodule item.
+        let newLink = document.createElement('a');
+        newLink.className = 'ou-section-link-sub';
+        newLink.title = module.name;
+        newLink.href = `/courses/${courseId}/modules/${module.id}`;
+        newLink.innerHTML = module.name;
+        if (allowMultipleModuleTitles) {
+            newLink.classList.add('ou-multiline');
+        }
+
+        // Check if the moduleItemId belongs to this module.
+        const currentModuleItem = module.items.find(item => item.id === parseInt(moduleItemId))
+        // Check if we need to make one of our sub-menu modules active
+        if (module.id === parseInt(moduleId) || currentModuleItem) {
+            // Remove the 'active' class of the current menu option.
+            const activeOptionMenu = document.querySelector('li.section > a.active');
+            activeOptionMenu.classList.remove('active');
+            // Make the current Module active
+            newLink.classList.add('active');
+        }
+
+        // Append the link to the submenu item.
+        newItem.appendChild(newLink);
+        // Append the submenu item to the submenu list.
+        moduleSubmenuList.appendChild(newItem);
+      });
+
+      moduleListItem.appendChild(moduleSubmenuList);
+
+    }
+
+    function ou_performLogic(moduleArray) {
       // moduleArray contains an array of Module objects
       // note - combining creation of lh modules sub-menu and Module tiles on Modules page to avoid repeated loops through data
       // set up some things before we begin going through Modules
-      var listUl = document.createElement('ul');  //the containing element for the modules sub-menu
-      listUl.className = 'ou-section-tabs-sub';
 
       //run through each module
-      moduleArray.forEach( function(module, mindex) {
+      moduleArray.forEach(function(module, mindex) {
 
           moduleItemsForProgress[module.id] = [];
 
@@ -313,43 +360,8 @@
                   }
               });
           }
-
-          //LH MENU
-          //create li
-          var newItem = document.createElement('li');
-          newItem.className = 'ou-section-sub';
-          listUl.appendChild(newItem);
-          //create a
-          var newLink = document.createElement('a');
-          newLink.className = 'ou-section-link-sub'; //Note set active if necessary
-          if (allowMultilineModuleTitles) {
-              newLink.classList.add('ou-multiline');
-          }
-          //check if we need to make one of our sub-menu modules active
-          if ((initModuleItemId && moduleIdByModuleItemId[initModuleItemId] && moduleIdByModuleItemId[initModuleItemId].moduleId && moduleIdByModuleItemId[initModuleItemId].moduleId==module.id) || (initModuleId && initModuleId==parseInt(module.id))) {
-              //first unactivate all lh menu items
-              var sectionLinks = document.querySelectorAll('li.section > a.active'); //should only be one!
-              Array.prototype.forEach.call(sectionLinks, function(sectionLink, i){
-                  //code to remove active from here: http://youmightnotneedjquery.com/
-                  var classNameToRemove = 'active';
-                  if (sectionLink.classList) {
-                      sectionLink.classList.remove(classNameToRemove);
-                  } else {
-                      sectionLink.className = sectionLink.className.replace(new RegExp('(^|\\b)' + classNameToRemove.split(' ').join('|') + '(\\b|$)', 'gi'), ' ');
-                  }
-              });
-              newLink.classList.add('active');  //make current Module active
-          }
-          newLink.title = module.name;
-          newLink.href = '/courses/' + initCourseId + '/modules/' + module.id;
-          newLink.innerHTML = module.name;
-          newItem.appendChild(newLink);
       });
 
-      // Add the list of modules to the LHS menu if the list item is visible.
-      if (lhsModulesListItem) {
-        lhsModulesListItem.appendChild(listUl);
-      }
 
       //now add Progress Bar
       setTimeout(ou_showProgressBar, 100); //timeout to ensure all elements have really loaded before running
