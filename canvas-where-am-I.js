@@ -87,8 +87,8 @@
         //New LH menu navigation - show on ALL pages in course
         if(initCourseId) {
             if(initModuleId) {
-                //we're on Modules page with link to specific module - let's hide other Modules'
-                var otherModuleDivs = document.querySelectorAll(`div.context_module:not([data-module-id='${initModuleId}'])`); //should only be one!; //should only be one!
+                // We're inside a specific modules, hide the other Modules
+                var otherModuleDivs = document.querySelectorAll(`div.context_module:not([data-module-id='${initModuleId}'])`);
                 Array.prototype.forEach.call(otherModuleDivs, function(otherModuleDiv){
                     otherModuleDiv.style.display = 'none';
                 });
@@ -653,27 +653,13 @@
      * @returns {int} id of module_item or 0 for not found
      */
     function ou_getModuleItemId() {
-        var moduleItemTerm = 'module_item_id=';
-        var currentUrl = window.location.href;
-        var moduleItemId = 0; //default to 0/not found
-        var startPos = currentUrl.indexOf(moduleItemTerm); //is this in URL
-        if (startPos != -1) {
-            startPos = startPos + moduleItemTerm.length; //account for length of moduleItemTerm as found beginning position
-            var finishPos = currentUrl.indexOf('&', startPos); //is there another query param after module_item_id=
-            if (finishPos == -1) {
-                finishPos = currentUrl.length;
-            }
-            moduleItemId = parseInt(currentUrl.slice(startPos, finishPos));
-        } else {
-            //for external links at least, we have a URL in the format: /courses/13199/modules/items/87888 so let's seee if we can extract from that
-            moduleItemTerm = '/modules/items/';
-            startPos = currentUrl.indexOf(moduleItemTerm); //is this in URL
-            if (startPos != -1) {
-                startPos = startPos + moduleItemTerm.length; //account for length of moduleItemTerm as found beginning position
-                moduleItemId = parseInt(currentUrl.slice(startPos)); //will substring from end
-            }
-        }
-        return moduleItemId;
+        const moduleRequestUrl = new URL(window.location.href);
+        const moduleRequestParams = new URLSearchParams(moduleRequestUrl.search);
+        // Get the module item id from the request
+        const moduleItemId = moduleRequestParams.get('module_item_id');
+        // If the module item id is in the request, return it.
+        // Otherwise return 0
+        return moduleItemId ? moduleItemId : 0;
     }
 
     /**
