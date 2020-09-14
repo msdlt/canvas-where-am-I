@@ -38,12 +38,15 @@
     const allowMultilineModuleTitles = false; //whether to allow LH menu Module links to be multiline
 
     /* DOM elements to check for */
+    // The structure hierarchy in Canvas is content > course_home_content > context_modules_sortable_container
     var divCourseHomeContent = document.getElementById('course_home_content');  //is this page Home
     var divContent = document.getElementById('content');
     const divContextModulesContainer = document.getElementById('context_modules_sortable_container');  //are we on the Modules page
-    //var aModules = document.querySelector('li.section a[class='modules']'); //retutrns breadcrumbs AND lh Nav
-    // This doesn't match if the modules page is hidden
-    const aModules = Array.from(document.querySelectorAll('li.section a')).find(el => el.textContent === 'Modules'); //see: https://stackoverflow.com/questions/37098405/javascript-queryselector-find-div-by-innertext
+    // Contains the Modules link in the LHS Menu (left hand side).
+    // This doesn't match if the modules page is hidden for the students.
+    // Gets the modules link by class, more optimal than the text content if the course language is not english <a class='modules' href="xxx"/>
+    const lhsModulesLink = document.querySelector('li.section a.modules');
+    const lhsModulesListItem = lhsModulesLink ? lhsModulesLink.parentNode : null
 
     /* Global variables */
     var moduleNav;
@@ -377,8 +380,10 @@
                     newItem.appendChild(newLink);
                 });
 
-                var liModules = aModules.parentNode;
-                liModules.appendChild(listUl);
+                // Add the list of modules to the LHS menu if the list item is visible.
+                if (lhsModulesListItem) {
+                  lhsModulesListItem.appendChild(listUl);
+                }
 
                 //now add Progress Bar
                 setTimeout(ou_showProgressBar, 100); //timeout to ensure all elements have really loaded before running
