@@ -88,10 +88,7 @@
         if(initCourseId) {
             if(initModuleId) {
                 // We're inside a specific modules, hide the other Modules
-                var otherModuleDivs = document.querySelectorAll(`div.context_module:not([data-module-id='${initModuleId}'])`);
-                Array.prototype.forEach.call(otherModuleDivs, function(otherModuleDiv){
-                    otherModuleDiv.style.display = 'none';
-                });
+                ou_hideOtherModules(initModuleId);
             }
             ou_getModules(initCourseId);
         }
@@ -602,6 +599,14 @@
             }
             */
         }
+    }
+
+    /*
+     * Hides all the modules except the module which id is the function's argument.
+     */
+    function ou_hideOtherModules(moduleId) {
+      var otherModuleDivs = document.querySelectorAll(`div.context_module:not([data-module-id='${moduleId}'])`);
+      otherModuleDivs.forEach(module => module.style.display = 'none');
     }
 
     /*
