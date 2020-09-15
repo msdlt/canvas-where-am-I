@@ -55,7 +55,7 @@ window.addEventListener('load', async (event) => {
 
     // We're inside a specific modules, hide the other Modules
     if (initModuleId) {
-        ou_hideOtherModules(initModuleId);
+        ou_removeOtherModules(initModuleId);
     }
 
     const courseModules = await ou_getModules(initCourseId);
@@ -365,11 +365,11 @@ window.addEventListener('load', async (event) => {
     }
 
     /*
-     * Hides all the modules except the module which id is the function's argument.
+     * Removed all the modules except the module which id is the function's argument.
      */
-    function ou_hideOtherModules(moduleId) {
+    function ou_removeOtherModules(moduleId) {
       var otherModuleDivs = document.querySelectorAll(`div.context_module:not([data-module-id='${moduleId}'])`);
-      otherModuleDivs.forEach(module => module.style.display = 'none');
+      otherModuleDivs.forEach(module => module.remove());
     }
 
     /*
