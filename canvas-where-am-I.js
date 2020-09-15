@@ -14,8 +14,6 @@ window.addEventListener('load', async (event) => {
     /* Amazon S3 bucket URL, this URL is needed to retrieve the course presentation and navigation settings */
     const amazonS3bucketUrl = `https://oxctl-modules.s3-eu-west-1.amazonaws.com`;
 
-    const allowMultilineModuleTitles = false; //whether to allow LH menu Module links to be multiline
-
     /* DOM elements to check for */
     // The structure hierarchy in Canvas is content > course_home_content > context_modules_sortable_container
     const divCourseHomeContent = document.getElementById('course_home_content');  //is this page Home
@@ -71,7 +69,9 @@ window.addEventListener('load', async (event) => {
 
     // Add the submenu of modules to the LHS menu if the modules list item is visible.
     if (lhsModulesListItem) {
-      ou_buildModulesSubmenu(courseModules, lhsModulesListItem, initCourseId, initModuleId, initModuleItemId, allowMultilineModuleTitles);
+      const moduleSubmenuList = ou_buildModulesSubmenu(initCourseId, courseModules, initModuleId, initModuleItemId);
+      // Append the module list to the modules tool item in the LHS menu.
+      lhsModulesListItem.appendChild(moduleSubmenuList);
     }
 
     if (initModuleItemId) {
@@ -216,7 +216,10 @@ window.addEventListener('load', async (event) => {
     /*
      * Builds the modules submenu adding all the modules as children of the Modules tool.
      */
-    function ou_buildModulesSubmenu(moduleArray, moduleListItem, courseId, moduleId, moduleItemId, allowMultilineModuleTitles) {
+    function ou_buildModulesSubmenu(courseId, moduleArray, moduleId, moduleItemId) {
+
+      // Whether to allow LH menu Module links to be multiline
+      const allowMultilineModuleTitles = false;
 
       // The containing element for the modules sub-menu
       let moduleSubmenuList = document.createElement('ul');
@@ -254,7 +257,7 @@ window.addEventListener('load', async (event) => {
         moduleSubmenuList.appendChild(newItem);
       });
 
-      moduleListItem.appendChild(moduleSubmenuList);
+      return moduleSubmenuList;
 
     }
 
