@@ -42,18 +42,15 @@
     const divCourseHomeContent = document.getElementById('course_home_content');  //is this page Home
     const divContent = document.getElementById('content');
     const divContextModulesContainer = document.getElementById('context_modules_sortable_container');  //are we on the Modules page
+
     // Contains the Modules link in the LHS Menu (left hand side).
     // This doesn't match if the modules page is hidden for the students.
     // Gets the modules link by class, more optimal than the text content if the course language is not english <a class='modules' href="xxx"/>
     const lhsModulesLink = document.querySelector('li.section a.modules');
     const lhsModulesListItem = lhsModulesLink ? lhsModulesLink.parentNode : null
 
-    /* Global variables */
-    var divFooterContent;
-
     /* Working out and storing where we are in Course */
     var moduleIdByModuleItemId = []; //used to store moduleIds using the ModuleItemId (as shown in url for pages, etc) so we can show active sub-modules {moduleId: x, moduleName: x, progress: x}
-    var moduleItemsForProgress = []; //used to store details of module items so can show as dots, if enough space, at bottom of page {href: string, title: string: icon: string, current: bool} - keyed first by module
 
     /* Context variables */
     const initCourseId = ou_getCourseId();  //which course are we in ONLY WORKS ON WEB
@@ -81,7 +78,7 @@
     }
 
     // We're inside a specific modules, hide the other Modules
-    if(initModuleId) {
+    if (initModuleId) {
         ou_hideOtherModules(initModuleId);
     }
 
@@ -97,7 +94,12 @@
       ou_buildModulesSubmenu(courseModules, lhsModulesListItem, initCourseId, initModuleId, initModuleItemId, allowMultilineModuleTitles);
     }
 
-    ou_performLogic(courseModules, isCourseHome);
+    if (initModuleItemId) {
+      const currentModule = courseModules.find(module => module.items.find(moduleItem => moduleItem.id === parseInt(initModuleItemId)));
+      const moduleItemsForProgress = ou_getModuleItemsForProgress(currentModule);
+      // TODO: This is buggy and doesnt look like a good approach, replace by a better approach.
+      setTimeout(ou_buildProgressBar(moduleItemsForProgress), 100);
+    }
 
 
     /****************************************/
@@ -265,293 +267,108 @@
 
     }
 
-    function ou_performLogic(moduleArray, isCourseHome) {
-      // moduleArray contains an array of Module objects
-      // note - combining creation of lh modules sub-menu and Module tiles on Modules page to avoid repeated loops through data
-      // set up some things before we begin going through Modules
+    function ou_getModuleItemsForProgress(currentModule) {
+      let moduleItemsForProgress = [];
 
-      //run through each module
-      moduleArray.forEach(function(module, mindex) {
-
-          moduleItemsForProgress[module.id] = [];
-
-          //If we're on a page launched via Modules, initModuleItemId != 0 so or if we have launched the whole Modules page (ie need menu at top)
-          if (initModuleItemId || isCourseHome) {
-              module.items.forEach( function(item, iindex){
-                  if (item.type !== 'SubHeader') { //don't want these represented anywhere - on Modules tiles dropdowns OR in progress buttons
-                      //TODO factor in the number of Text Headers before calculating % complete
-                      //var progressAsPercentage = Math.round(((iindex+1)/module.items.length)*100);
-
-                      var tempObj = {
-                          moduleId: item.module_id,
-                          moduleName: module.name/*,
-                          progress: progressAsPercentage */
-                      };
-
-                      moduleIdByModuleItemId[parseInt(item.id)] = tempObj; //for deciding which sub-module on lh menu is active
-
-                      // var itemTitle = item.title;
-                      var itemId = item.id;
-                      var itemType = item.type;
-                      var iconType = ou_getItemTypeIcon(itemType);
-
-                      var listItem = document.createElement('li');
-                      listItem.className = 'ou-menu-item-wrapper';
-
-                      const listItemDest = `/courses/${initCourseId}/modules/items/${itemId}`;
-                      // note only want to do this for current module
-                      var isCurrentItem = parseInt(initModuleItemId) == parseInt(item.id);
-                      var tempNavObj = {
-                          href: listItemDest,
-                          title: item.title,
-                          icon: iconType,
-                          current: isCurrentItem
-                      };
-
-                      moduleItemsForProgress[module.id][iindex] = tempNavObj;
-
-                      /*
-                      var listItemLink = document.createElement('a');
-                      listItemLink.className = iconType;
-                      listItemLink.href = listItemDest;
-                      listItemLink.text = itemTitle;
-                      listItemLink.tabindex = -1;
-                      listItemLink.setAttribute('role', 'menuitem');
-                      listItemLink.title = itemTitle;
-
-                      listItem.appendChild(listItemLink);
-
-                      if(divContextModulesContainer && showItemLinks) {
-                          moduleTileList.appendChild(listItem);
-                      } else {
-                          //note only want to do this for current module
-                          var isCurrentItem = parseInt(initModuleItemId) == parseInt(item.id);
-                          var tempNavObj = {
-                              href: listItemDest,
-                              title: item.title,
-                              icon: iconType,
-                              current: isCurrentItem
-                          };
-                          moduleItemsForProgress[module.id][iindex] = tempNavObj;
-                      }
-                      */
-                  }
-              });
+      currentModule.items.forEach(item => {
+          //don't want these represented anywhere - on Modules tiles dropdowns OR in progress buttons
+          if (item.type === 'SubHeader') {
+            return;
           }
-      });
 
+          let itemId = item.id;
+          let itemType = item.type;
+          let iconType = ou_getItemTypeIcon(itemType);
 
-      //now add Progress Bar
-      setTimeout(ou_showProgressBar, 100); //timeout to ensure all elements have really loaded before running
+          const listItemDest = `/courses/${initCourseId}/modules/items/${itemId}`;
+          // note only want to do this for current module
+          let isCurrentItem = parseInt(initModuleItemId) == parseInt(item.id);
+          let itemNavObject = {
+              href: listItemDest,
+              title: item.title,
+              icon: iconType,
+              current: isCurrentItem
+          };
 
-      //click event listener for module tile buttons
-      /*
-      document.addEventListener('click', function (event) {
-          if (!event.target.getAttribute('menu-to-show')) return;
-          // Don't follow the link
-          event.preventDefault();
-          ou_handleArrowPress(event.target);
+          moduleItemsForProgress.push(itemNavObject);
 
-      }, false);
+        });
 
-      document.addEventListener('keydown', function (event) {
-          if (event.target.getAttribute('menu-to-show')) {
-              if (event.keyCode == 13 || event.keyCode == 32 || event.keyCode == 38 || event.keyCode == 40) {
-                  event.preventDefault();
-                  event.stopPropagation();
-                  ou_handleArrowPress(event.target);
-                  return false;
-              }
-          }
-      }, false);
-      */
+        return moduleItemsForProgress;
+
     }
 
     /*
-     * Function which shows progress bar between Next and Previous buttons IF item shown as part of Module
+     * Function which builds progress bar between Next and Previous buttons IF item shown as part of Module
      */
-    function ou_showProgressBar() {
-        //can't get footer too early as getElementsByClassName doesn't seem to work as arly as byId
-        var footerContents = document.getElementsByClassName('module-sequence-footer-content');
-        if (footerContents.length > 0) {
-            divFooterContent = footerContents[0];
+    function ou_buildProgressBar(moduleItemsForProgress) {
+        const divFooterContent = document.getElementsByClassName('module-sequence-footer-content')[0];
+        if (!divFooterContent) {
+          return;
         }
 
-        if(divFooterContent && initModuleItemId) {
-            //we have a footer and we're viewing via Modules
-            var progressBarContainer = document.createElement('div');
-            progressBarContainer.classList.add('ou-ProgBarContainer');
-            var divProgLeftCol = document.createElement('div');
-            divProgLeftCol.classList.add('ou-ProgLeftCol');
-            var divProgRightCol = document.createElement('div');
-            divProgRightCol.classList.add('ou-ProgRightCol');
-            progressBarContainer.appendChild(divProgLeftCol);
-            progressBarContainer.appendChild(divProgRightCol);
+        // Now create flexible divs to pop progress bar and next and previous buttons into
+        // 1. Ceate div with one flexible and two inflexible divs at either end
+        let divColContainer = document.createElement('div');
+        divColContainer.classList.add('ou-ColContainer');
+        // Left col will contain the previous button if exists.
+        let divLeftCol = document.createElement('div');
+        divLeftCol.classList.add('ou-LeftCol');
+        // Centre col will contain the module item links.
+        let divCentreCol = document.createElement('div');
+        divCentreCol.classList.add('ou-CentreCol');
+        // Right col will contain the next button if exists
+        let divRightCol = document.createElement('div');
+        divRightCol.classList.add('ou-RightCol');
 
-            //Progress bar itself
+        // 2. Move buttons if present - awkwardly, pevious is just a link and next sits in span -  into the two inflexible ends
+        divColContainer.appendChild(divLeftCol);
+        divColContainer.appendChild(divCentreCol);
+        divColContainer.appendChild(divRightCol);
 
-            //Now create flexible divs to pop progress bar and next and previous buttons into
-            //1. Ceate div with one flexible and two inflexible divs at either end
-            var divColContainer = document.createElement('div');
-            divColContainer.classList.add('ou-ColContainer');
-            var divLeftCol = document.createElement('div');
-            divLeftCol.classList.add('ou-LeftCol');
-            var divCentreCol = document.createElement('div');
-            divCentreCol.classList.add('ou-CentreCol');
-            var divRightCol = document.createElement('div');
-            divRightCol.classList.add('ou-RightCol');
-            //2. Move buttons if present - awkwardly, pevious is just a link and next sits in span -  into the two inflexible ends
-            divColContainer.appendChild(divLeftCol);
-            divColContainer.appendChild(divCentreCol);
-            divColContainer.appendChild(divRightCol);
-            //3. Place new progressBarContainer in the middle flexible div
-            divFooterContent.appendChild(divColContainer);
-
-            //first work out whether have enough room for the progress buttons - if not, show bar
-            var progressIconsLarge = true;
-            if ((moduleItemsForProgress[moduleIdByModuleItemId[initModuleItemId].moduleId].length * widthOfButton) > (divCentreCol.offsetWidth - widthOfCentreColPadding)) {
-                progressIconsLarge = false;
-            }
-
-            //create individual progress buttons version
-            var divProgressIcons = document.createElement('div');
-            divProgressIcons.className = 'ou-progress-icons';
-            var noOfItems = moduleItemsForProgress[moduleIdByModuleItemId[initModuleItemId].moduleId].length;
-            var divProgressItems = document.createElement('ul');
-            divProgressItems.className = 'ou-progress-items';
-            /*
-            if (progressIconsLarge) {
-                divProgressItems.className = 'ou-progress-items';
-            } else {
-                divProgressItems.className = 'ou-progress-items small';
-            }
-            */
-
-            moduleItemsForProgress[moduleIdByModuleItemId[initModuleItemId].moduleId].forEach( function(item, index) {
-                var listItem = document.createElement('li');
-                var listItemLink = document.createElement('a');
-                if (progressIconsLarge) {
-                    listItem.className = 'ou-progress-item';
-                    listItemLink.classList.add(item.icon);
-                } else {
-                    listItem.className = 'ou-progress-item small';
-                    //calculate % size
-                    var itemWidth = (divCentreCol.offsetWidth - widthOfCentreColPadding) / noOfItems;
-                    if (itemWidth > 30) { //keeps it sqaure
-                        itemWidth = 30;
-                    }
-                    listItem.style.width = itemWidth + 'px';
-                    //listItemLink.classList.add(item.icon);
-                }
-                if(item.current) {
-                    listItemLink.classList.add('active');
-                }
-                listItemLink.href = item.href;
-                listItemLink.setAttribute('role', 'menuitem');
-                listItemLink.title = item.title;
-                listItem.appendChild(listItemLink);
-                divProgressItems.appendChild(listItem);
-            });
-
-            divProgressIcons.appendChild(divProgressItems);
-
-            //create bar version
-            /*
-            var divProgressBar = document.createElement('div');
-            divProgressBar.classList.add('ou-ProgressBar');
-            divProgressBar.setAttribute('aria-valuemax', 100);
-            divProgressBar.setAttribute('aria-valuemin', 0);
-            divProgressBar.setAttribute('aria-valuenow', moduleIdByModuleItemId[initModuleItemId].progress);
-            var divProgressBarBar = document.createElement('div');
-            divProgressBarBar.classList.add('ou-ProgressBarBar');
-            divProgressBarBar.style.width = moduleIdByModuleItemId[initModuleItemId].progress +'%';
-            divProgressBar.setAttribute('title', 'Position in: ' + moduleIdByModuleItemId[initModuleItemId].moduleName + ' = ' + moduleIdByModuleItemId[initModuleItemId].progress +'%');
-            //divProgressBar.setAttribute('data-html-tooltip-title', moduleIdByModuleItemId[initModuleItemId].moduleName + ': ' + moduleIdByModuleItemId[initModuleItemId].progress +'%');
-            divProgressBar.appendChild(divProgressBarBar);
-            //Wording
-            var divProgressLabel = document.createElement('div');
-            divProgressLabel.textContent = 'Position in module: '
-            */
-
-
-            //look for Previous button
-            var previousButton = document.querySelector('a.module-sequence-footer-button--previous');
-            // var previousButtonTop;  //disabled at the moment as Canvas had very non-standard headers
-            if (previousButton) {
-                divLeftCol.appendChild(previousButton);
-                /*
-                previousButtonTop = previousButton.cloneNode(true);
-                previousButtonTop.classList.add('ou-PreviousTop'); //make space on right
-                */
-            }
-            //look for Next button
-            var nextButton = document.querySelector('span.module-sequence-footer-button--next');
-            //var nextButtonTop; //disabled at the moment as Canvas had very non-standard headers
-            if (nextButton) {
-                divRightCol.appendChild(nextButton);
-                //nextButtonTop = nextButton.cloneNode(true);
-                //nextButtonTop.classList.add('ou-NextTop'); //make space on right
-            }
-
-            divCentreCol.appendChild(divProgressIcons);
-
-            //Now work out whether have enough room for the progress buttons - if not, show bar
-            /*
-            if((moduleItemsForProgress[moduleIdByModuleItemId[initModuleItemId].moduleId].length * widthOfButton) < (divCentreCol.offsetWidth - widthOfCentreColPadding)) {
-                divCentreCol.appendChild(divProgressIcons);
-            } else {
-                if((widthOfPositionWords * 2) < (divCentreCol.offsetWidth - widthOfCentreColPadding)) {
-                    //only show label if enough room - ie > 2 x width of label
-                    divProgLeftCol.appendChild(divProgressLabel);
-                }
-                divProgRightCol.appendChild(divProgressBar);
-                divCentreCol.appendChild(progressBarContainer);
-            }
-            */
-
-            /*
-             * Cloning prevous and next and adding to appropriate parts of header
-             *
-             * Note that .header-left-flex and .header-right-flex don't exist on several content types (below)
-             * so, thinking to chcek first for Page header, then work through:
-             * - Discussion = div#keyboard-shortcut-modal-info (left should be OK if we append into that after accessibility spans) and div.pull-right(right- float:right)
-             * - Quizzes = div.header-bar-right (right - float:right) inside div.header-bar - left would have to be inserted into div.header-bar
-             * - Assignment = div.assignment_title contains - left: div.title-content and right: div.assignment-buttons
-             * If none of those clases are present, assume no header and insert as immediate child of div#content which would deal with below
-             * - File = no header - could add as immediate child of div#content
-             * - External URL = no header - could add as immediate child of div#content
-             * - External tool = no header - could add immedioately below div#content
-             */
-
-            /*
-            if(previousButtonTop) {
-                var divHeaderLefts = document.getElementsByClassName('header-left-flex'); //this is the left header element for Pages
-                if(divHeaderLefts.length > 0) {
-                    var divHeaderLeft = divHeaderLefts[0];
-                    divHeaderLeft.insertBefore(previousButtonTop, divHeaderLeft.firstChild);
-                } else {
-                    //var discussionManageBar = document.getElementById('discussion-managebar');
-                    //if(discussionManageBar) {
-                        //we should be in a discussion
-                    }
-                }
-            }
-
-            if(nextButtonTop) {
-                var divHeaderRights = document.getElementsByClassName('header-right-flex'); //this is the right header element for Pages
-                if(divHeaderRights.length > 0) {
-                    var divHeaderRight = divHeaderRights[0];
-                    //divHeaderRight.insertBefore(nextButtonTop, divHeaderRight.firstChild);
-                    divHeaderRight.appendChild(nextButtonTop);
-                } else {
-                    //var discussionManageBar = document.getElementById('discussion-managebar');
-                    //if(discussionManageBar) {
-                        //we should be in a discussion
-                    //}
-                }
-            }
-            */
+        // 3. Place the existing navigation buttons into the right and left columns
+        // Look for Previous button
+        const previousButton = document.querySelector('a.module-sequence-footer-button--previous');
+        if (previousButton) {
+            divLeftCol.appendChild(previousButton);
         }
+        // Look for Next button
+        const nextButton = document.querySelector('span.module-sequence-footer-button--next');
+        if (nextButton) {
+            divRightCol.appendChild(nextButton);
+        }
+
+        // Create individual progress buttons version
+        let divProgressIcons = document.createElement('div');
+        divProgressIcons.className = 'ou-progress-icons';
+        let divProgressItems = document.createElement('ul');
+        divProgressItems.className = 'ou-progress-items';
+
+        moduleItemsForProgress.forEach(item => {
+            let listItem = document.createElement('li');
+            let listItemLink = document.createElement('a');
+            listItem.className = 'ou-progress-item';
+            listItemLink.classList.add(item.icon);
+            if (item.current) {
+                listItemLink.classList.add('active');
+            }
+            listItemLink.href = item.href;
+            listItemLink.setAttribute('role', 'menuitem');
+            listItemLink.title = item.title;
+            // Add the link to the item
+            listItem.appendChild(listItemLink);
+            // Add the item to the list of items
+            divProgressItems.appendChild(listItem);
+        });
+
+        // Add the list of items to the items DIV
+        divProgressIcons.appendChild(divProgressItems);
+        // Add the items DIV to the centre column
+        divCentreCol.appendChild(divProgressIcons);
+
+        // 4. Place new progressBarContainer in the middle flexible div
+        divFooterContent.appendChild(divColContainer);
+
     }
 
     /*
