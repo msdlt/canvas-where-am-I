@@ -80,7 +80,7 @@
     if (isCourseHome) {
       // Hide the current home content div.
       divCourseHomeContent.style.display = 'none';
-      ou_replaceStandardByTileView(courseModules, divContent, noOfColumnsPerRow, moduleColours);
+      ou_buildModulesTileView(courseModules, divContent, noOfColumnsPerRow, moduleColours);
     }
 
     // Add the submenu of modules to the LHS menu if the modules list item is visible.
@@ -147,9 +147,9 @@
     }
 
     /*
-     * Replaces the standard view of the course home modules by the tile view.
+     * Builds the tile view for the course modules home.
      */
-    function ou_replaceStandardByTileView(moduleArray, contentDiv, noOfColumnsPerRow, moduleColours) {
+    function ou_buildModulesTileView(moduleArray, contentDiv, noOfColumnsPerRow, moduleColours) {
 
       const moduleNavId = 'module_nav';
       //First delete any existing nav container
