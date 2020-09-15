@@ -30,11 +30,6 @@
         '#9c4700','#c7302b','#ebc4cb','#1daced'
     ];
 
-    // var showItemLinks = 1; //whether or not to show drop-down links to items within Modules in tiles NOTE: Currently disabled - need to read this: https://www.w3.org/WAI/tutorials/menus/application-menus-code/ for how to do it accessibly
-
-    const widthOfButton = 42;  //width of a Progress bar button //TODO - calculate this
-    const widthOfCentreColPadding = 72; //used to calculate whether enough room to show Progress bar buttons //TODO - calculate this
-    // const widthOfPositionWords = 134; //used to calculate whether enough room to show Progress bar buttons //TODO - calculate this
     const allowMultilineModuleTitles = false; //whether to allow LH menu Module links to be multiline
 
     /* DOM elements to check for */
@@ -48,9 +43,6 @@
     // Gets the modules link by class, more optimal than the text content if the course language is not english <a class='modules' href="xxx"/>
     const lhsModulesLink = document.querySelector('li.section a.modules');
     const lhsModulesListItem = lhsModulesLink ? lhsModulesLink.parentNode : null
-
-    /* Working out and storing where we are in Course */
-    var moduleIdByModuleItemId = []; //used to store moduleIds using the ModuleItemId (as shown in url for pages, etc) so we can show active sub-modules {moduleId: x, moduleName: x, progress: x}
 
     /* Context variables */
     const initCourseId = ou_getCourseId();  //which course are we in ONLY WORKS ON WEB
@@ -86,7 +78,9 @@
     const isCourseHome = divContextModulesContainer && !initModuleId && divCourseHomeContent;
     // If the user is in the course home and contains modules, replace the standard view by the tile view.
     if (isCourseHome) {
-      ou_replaceStandardByTileView(courseModules, divContent, divCourseHomeContent);
+      // Hide the current home content div.
+      divCourseHomeContent.style.display = 'none';
+      ou_replaceStandardByTileView(courseModules, divContent, noOfColumnsPerRow, moduleColours);
     }
 
     // Add the submenu of modules to the LHS menu if the modules list item is visible.
@@ -155,9 +149,7 @@
     /*
      * Replaces the standard view of the course home modules by the tile view.
      */
-    function ou_replaceStandardByTileView(moduleArray, contentDiv, homeContentDiv) {
-      // Hide the current home content div.
-      homeContentDiv.style.display = 'none';
+    function ou_replaceStandardByTileView(moduleArray, contentDiv, noOfColumnsPerRow, moduleColours) {
 
       const moduleNavId = 'module_nav';
       //First delete any existing nav container
@@ -226,7 +218,8 @@
     /*
      * Builds the modules submenu adding all the modules as children of the Modules tool.
      */
-    function ou_buildModulesSubmenu(moduleArray, moduleListItem, courseId, moduleId, moduleItemId, allowMultipleModuleTitles) {
+    function ou_buildModulesSubmenu(moduleArray, moduleListItem, courseId, moduleId, moduleItemId, allowMultilineModuleTitles) {
+
       // The containing element for the modules sub-menu
       let moduleSubmenuList = document.createElement('ul');
       moduleSubmenuList.className = 'ou-section-tabs-sub';
@@ -242,7 +235,7 @@
         newLink.title = module.name;
         newLink.href = `/courses/${courseId}/modules/${module.id}`;
         newLink.innerHTML = module.name;
-        if (allowMultipleModuleTitles) {
+        if (allowMultilineModuleTitles) {
             newLink.classList.add('ou-multiline');
         }
 
