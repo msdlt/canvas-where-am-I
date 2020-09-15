@@ -4,7 +4,8 @@
 // TODO investigate whether we could limit Module titles in LH menu to e.g two lines
 // TODO can we refresh menu when editing Modules?
 
-(async function () {  //method from: https://community.canvaslms.com/thread/22500-mobile-javascript-development
+// All the logic should be performed after the load event so we have all the elements loaded.
+window.addEventListener('load', async (event) => {
 
     /****************************************/
     /**** Start of Configuration Section ****/
@@ -90,8 +91,7 @@
     if (initModuleItemId) {
       const currentModule = courseModules.find(module => module.items.find(moduleItem => moduleItem.id === parseInt(initModuleItemId)));
       const moduleItemsForProgress = ou_getModuleItemsForProgress(initCourseId, initModuleItemId, currentModule);
-      // TODO: This is buggy and doesnt look like a good approach, replace by a better approach.
-      setTimeout(ou_buildProgressBar(moduleItemsForProgress), 100);
+      ou_buildProgressBar(moduleItemsForProgress);
     }
 
 
@@ -471,4 +471,4 @@
     /***** End of function definitions ******/
     /****************************************/
 
-})();
+});
