@@ -79,7 +79,7 @@
     if (isCourseHome) {
       // Hide the current home content div.
       divCourseHomeContent.style.display = 'none';
-      ou_buildModulesTileView(courseModules, divContent, noOfColumnsPerRow, moduleColours);
+      ou_buildModulesTileView(initCourseId, courseModules, divContent, noOfColumnsPerRow, moduleColours);
     }
 
     // Add the submenu of modules to the LHS menu if the modules list item is visible.
@@ -89,7 +89,7 @@
 
     if (initModuleItemId) {
       const currentModule = courseModules.find(module => module.items.find(moduleItem => moduleItem.id === parseInt(initModuleItemId)));
-      const moduleItemsForProgress = ou_getModuleItemsForProgress(currentModule);
+      const moduleItemsForProgress = ou_getModuleItemsForProgress(initCourseId, initModuleItemId, currentModule);
       // TODO: This is buggy and doesnt look like a good approach, replace by a better approach.
       setTimeout(ou_buildProgressBar(moduleItemsForProgress), 100);
     }
@@ -106,8 +106,8 @@
     /*
      * Checks if the CPN view is enabled requesting the CPN settings from the Amazon S3 bucket.
      */
-    async function ou_CheckSettings(initDomainId, initCourseId) {
-      const settingsFileRequestUrl = `${amazonS3bucketUrl}/${initDomainId}/${initCourseId}.json`;
+    async function ou_CheckSettings(domainId, courseId) {
+      const settingsFileRequestUrl = `${amazonS3bucketUrl}/${domainId}/${courseId}.json`;
       const isTileViewEnabled = await fetch(settingsFileRequestUrl)
         .then(ou_json)
         .then(function(json) {
@@ -148,7 +148,7 @@
     /*
      * Builds the tile view for the course modules home.
      */
-    function ou_buildModulesTileView(moduleArray, contentDiv, noOfColumnsPerRow, moduleColours) {
+    function ou_buildModulesTileView(courseId, moduleArray, contentDiv, noOfColumnsPerRow, moduleColours) {
 
       const moduleNavId = 'module_nav';
       //First delete any existing nav container
@@ -186,7 +186,7 @@
         moduleTile.title = module.name;
 
         let moduleTileLink = document.createElement('a');
-        moduleTileLink.href = `/courses/${initCourseId}/modules/${module.id}`;
+        moduleTileLink.href = `/courses/${courseId}/modules/${module.id}`;
 
         let moduleTileHeader = document.createElement('div');
         moduleTileHeader.className = 'ou-ModuleCard__header_hero_short';
@@ -260,7 +260,7 @@
 
     }
 
-    function ou_getModuleItemsForProgress(currentModule) {
+    function ou_getModuleItemsForProgress(courseId, moduleItemId, currentModule) {
       let moduleItemsForProgress = [];
 
       currentModule.items.forEach(item => {
@@ -273,9 +273,9 @@
           let itemType = item.type;
           let iconType = ou_getItemTypeIcon(itemType);
 
-          const listItemDest = `/courses/${initCourseId}/modules/items/${itemId}`;
+          const listItemDest = `/courses/${courseId}/modules/items/${itemId}`;
           // note only want to do this for current module
-          let isCurrentItem = parseInt(initModuleItemId) == parseInt(item.id);
+          let isCurrentItem = parseInt(moduleItemId) == parseInt(item.id);
           let itemNavObject = {
               href: listItemDest,
               title: item.title,
