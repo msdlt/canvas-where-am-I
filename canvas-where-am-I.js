@@ -265,7 +265,7 @@
 
     }
 
-    function ou_performLogic(moduleArray) {
+    function ou_performLogic(moduleArray, isCourseHome) {
       // moduleArray contains an array of Module objects
       // note - combining creation of lh modules sub-menu and Module tiles on Modules page to avoid repeated loops through data
       // set up some things before we begin going through Modules
@@ -293,29 +293,7 @@
                       // var itemTitle = item.title;
                       var itemId = item.id;
                       var itemType = item.type;
-                      var iconType;
-                      switch (itemType) {
-                          case 'Page':
-                              iconType = 'icon-document';
-                              break;
-                          case 'File':
-                              iconType = 'icon-paperclip';
-                              break;
-                          case 'Discussion':
-                              iconType = 'icon-discussion';
-                              break;
-                          case 'Quiz':
-                              iconType = 'icon-quiz';
-                              break;
-                          case 'Assignment':
-                              iconType = 'icon-assignment';
-                              break;
-                          case 'ExternalUrl':
-                              iconType = 'icon-link';
-                              break;
-                          default:
-                              iconType = 'icon-document';
-                      }
+                      var iconType = ou_getItemTypeIcon(itemType);
 
                       var listItem = document.createElement('li');
                       listItem.className = 'ou-menu-item-wrapper';
@@ -653,6 +631,28 @@
         // If the module hash starts with the module_ prefix, remove the prefix to get the Id.
         // Otherwise return 0, moduleId not found
         return moduleHash.startsWith(moduleHashPrefix) ? moduleHash.replace(moduleHashPrefix, '') : 0;
+    }
+
+    /**
+     * Assigns an icon depending on the type of the item.
+     */
+    function ou_getItemTypeIcon(itemType) {
+      switch (itemType) {
+          case 'Page':
+              return 'icon-document';
+          case 'File':
+              return 'icon-paperclip';
+          case 'Discussion':
+              return 'icon-discussion';
+          case 'Quiz':
+              return 'icon-quiz';
+          case 'Assignment':
+              return 'icon-assignment';
+          case 'ExternalUrl':
+              return 'icon-link';
+          default:
+              return'icon-document';
+      }
     }
 
     /****************************************/
