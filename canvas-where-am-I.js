@@ -75,9 +75,16 @@ window.addEventListener('load', async (event) => {
     }
 
     if (initModuleItemId) {
-      const currentModule = courseModules.find(module => module.items.find(moduleItem => moduleItem.id === parseInt(initModuleItemId)));
-      const moduleItemsForProgress = ou_getModuleItemsForProgress(initCourseId, initModuleItemId, currentModule);
-      ou_buildProgressBar(moduleItemsForProgress);
+      // Get the footer by id, in many pages the id is sequence_footer, in the last page the id is module_navigation_target
+      const divFooter = document.querySelector('#module_navigation_target, #sequence_footer');
+      const divFooterContent = divFooter.querySelector('.module-sequence-footer-content');
+      if (divFooterContent) {
+        const currentModule = courseModules.find(module => module.items.find(moduleItem => moduleItem.id === parseInt(initModuleItemId)));
+        const moduleItemsForProgress = ou_getModuleItemsForProgress(initCourseId, initModuleItemId, currentModule);
+        const progressBarDiv = ou_buildProgressBar(moduleItemsForProgress);
+        // Place new progressBarContainer in the middle flexible div
+        divFooterContent.appendChild(progressBarDiv);
+      }
     }
 
 
@@ -296,12 +303,6 @@ window.addEventListener('load', async (event) => {
      * Function which builds progress bar between Next and Previous buttons IF item shown as part of Module
      */
     function ou_buildProgressBar(moduleItemsForProgress) {
-        // Get the footer by id, in many pages the id is sequence_footer, in the last page the id is module_navigation_target
-        const divFooter = document.querySelector('#module_navigation_target, #sequence_footer');
-        const divFooterContent = divFooter.querySelector('.module-sequence-footer-content');
-        if (!divFooterContent) {
-          return;
-        }
 
         // Now create flexible divs to pop progress bar and next and previous buttons into
         // 1. Ceate div with one flexible and two inflexible divs at either end
@@ -362,8 +363,7 @@ window.addEventListener('load', async (event) => {
         // Add the items DIV to the centre column
         divCentreCol.appendChild(divProgressIcons);
 
-        // 4. Place new progressBarContainer in the middle flexible div
-        divFooterContent.appendChild(divColContainer);
+        return divColContainer;
 
     }
 
