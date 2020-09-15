@@ -14,22 +14,6 @@ window.addEventListener('load', async (event) => {
     /* Amazon S3 bucket URL, this URL is needed to retrieve the course presentation and navigation settings */
     const amazonS3bucketUrl = `https://oxctl-modules.s3-eu-west-1.amazonaws.com`;
 
-    const noOfColumnsPerRow = 4;  //no of columns per row of tiles at top of Modules page - 1, 2, 3, 4, 6 or 12 - ONLY USE 4 for the moment
-    /* colours for Module tiles mostly randomly selected from: https://www.ox.ac.uk/public-affairs/style-guide/digital-style-guide */
-    const moduleColours = [
-        '#e8ab1e','#91b2c6','#517f96','#1c4f68',
-        '#400b42','#293f11','#640D14','#b29295',
-        '#002147','#cf7a30','#a79d96','#aab300',
-        '#872434','#043946','#fb8113','#be0f34',
-        '#a1c4d0','#122f53','#0f7361','#3277ae',
-        '#44687d','#517fa4','#177770','#be0f34',
-        '#d34836','#70a9d6','#69913b','#d62a2a',
-        '#5f9baf','#09332b','#44687d','#721627',
-        '#9eceeb','#330d14','#006599','#cf7a30',
-        '#a79d96','#be0f34','#001c3d','#ac48bf',
-        '#9c4700','#c7302b','#ebc4cb','#1daced'
-    ];
-
     const allowMultilineModuleTitles = false; //whether to allow LH menu Module links to be multiline
 
     /* DOM elements to check for */
@@ -78,9 +62,11 @@ window.addEventListener('load', async (event) => {
     const isCourseHome = divContextModulesContainer && !initModuleId && divCourseHomeContent;
     // If the user is in the course home and contains modules, replace the standard view by the tile view.
     if (isCourseHome) {
-      // Hide the current home content div.
-      divCourseHomeContent.style.display = 'none';
-      ou_buildModulesTileView(initCourseId, courseModules, divContent, noOfColumnsPerRow, moduleColours);
+      // Remove the current home content instead of hiding it.
+      divCourseHomeContent.remove();
+      const tileViewDiv = ou_buildModulesTileView(initCourseId, courseModules);
+      // Insert the modules div into the content
+      divContent.appendChild(tileViewDiv);
     }
 
     // Add the submenu of modules to the LHS menu if the modules list item is visible.
@@ -148,21 +134,31 @@ window.addEventListener('load', async (event) => {
     /*
      * Builds the tile view for the course modules home.
      */
-    function ou_buildModulesTileView(courseId, moduleArray, contentDiv, noOfColumnsPerRow, moduleColours) {
+    function ou_buildModulesTileView(courseId, moduleArray) {
 
-      const moduleNavId = 'module_nav';
-      //First delete any existing nav container
-      let existingModuleNav = document.getElementById(moduleNavId);
-      if (existingModuleNav) {
-          existingModuleNav.parentNode.removeChild(existingModuleNav);
-      }
-      //Create our nav container
+      //no of columns per row of tiles at top of Modules page - 1, 2, 3, 4, 6 or 12 - ONLY USE 4 for the moment
+      const noOfColumnsPerRow = 4;
+
+      /* colours for Module tiles mostly randomly selected from: https://www.ox.ac.uk/public-affairs/style-guide/digital-style-guide */
+      const moduleColours = [
+          '#e8ab1e','#91b2c6','#517f96','#1c4f68',
+          '#400b42','#293f11','#640D14','#b29295',
+          '#002147','#cf7a30','#a79d96','#aab300',
+          '#872434','#043946','#fb8113','#be0f34',
+          '#a1c4d0','#122f53','#0f7361','#3277ae',
+          '#44687d','#517fa4','#177770','#be0f34',
+          '#d34836','#70a9d6','#69913b','#d62a2a',
+          '#5f9baf','#09332b','#44687d','#721627',
+          '#9eceeb','#330d14','#006599','#cf7a30',
+          '#a79d96','#be0f34','#001c3d','#ac48bf',
+          '#9c4700','#c7302b','#ebc4cb','#1daced'
+      ];
+
+      // Create our nav container
       let moduleNav = document.createElement('div');
-      moduleNav.id = moduleNavId;
+      moduleNav.id = 'module_nav';
       moduleNav.className = 'ou-ModuleCard__box';
       moduleNav.innerHTML = '<a id="module_nav_anchor"></a>';
-      // Insert moduleNav onto page
-      contentDiv.insertBefore(moduleNav, contentDiv.childNodes[0]);
 
       let newRow;
       moduleArray.forEach((module, mindex) => {
@@ -212,6 +208,8 @@ window.addEventListener('load', async (event) => {
         newColumn.appendChild(moduleTile);
 
       });
+
+      return moduleNav;
 
     }
 
