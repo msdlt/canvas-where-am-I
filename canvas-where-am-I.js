@@ -1,6 +1,5 @@
 /**** TODO LIST ****/
 // TODO Check that we have added icons for all itemTypes
-// TODO Functionise a bit more - a lot of work done in ou_getModules to avoid having multiple for loops steping through Modules/Items
 // TODO Check that we haven't lost any of Canvas's accessibility features
 // TODO investigate whether we could limit Module titles in LH menu to e.g two lines
 // TODO can we refresh menu when editing Modules?
@@ -177,7 +176,8 @@
         var newColumn = document.createElement('div');
 
         // create column wrapper
-        newColumn.className = 'col-xs-12 col-sm-6 col-lg-3'; //TODO work out classes for noOfColumnsPerRow != 4
+        // TODO work out classes for noOfColumnsPerRow != 4
+        newColumn.className = 'col-xs-12 col-sm-6 col-lg-3';
         newRow.appendChild(newColumn);
 
         //create module div
@@ -295,7 +295,9 @@
      * Function which builds progress bar between Next and Previous buttons IF item shown as part of Module
      */
     function ou_buildProgressBar(moduleItemsForProgress) {
-        const divFooterContent = document.getElementsByClassName('module-sequence-footer-content')[0];
+        // Get the footer by id, in many pages the id is sequence_footer, in the last page the id is module_navigation_target
+        const divFooter = document.querySelector('#module_navigation_target, #sequence_footer');
+        const divFooterContent = divFooter.querySelector('.module-sequence-footer-content');
         if (!divFooterContent) {
           return;
         }
