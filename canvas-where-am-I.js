@@ -42,7 +42,7 @@
     // This doesn't match if the modules page is hidden for the students.
     // Gets the modules link by class, more optimal than the text content if the course language is not english <a class='modules' href="xxx"/>
     const lhsModulesLink = document.querySelector('li.section a.modules');
-    const lhsModulesListItem = lhsModulesLink ? lhsModulesLink.parentNode : null
+    const lhsModulesListItem = lhsModulesLink ? lhsModulesLink.parentNode : null;
 
     /* Context variables */
     const initCourseId = ou_getCourseId();  //which course are we in ONLY WORKS ON WEB
@@ -143,7 +143,7 @@
         console.log('Failed to get course modules', error);
         return [];
       });
-      return courseModules
+      return courseModules;
     }
 
     /*
@@ -240,7 +240,7 @@
         }
 
         // Check if the moduleItemId belongs to this module.
-        const currentModuleItem = module.items.find(item => item.id === parseInt(moduleItemId))
+        const currentModuleItem = module.items.find(item => item.id === parseInt(moduleItemId));
         // Check if we need to make one of our sub-menu modules active
         if (module.id === parseInt(moduleId) || currentModuleItem) {
             // Remove the 'active' class of the current menu option.
