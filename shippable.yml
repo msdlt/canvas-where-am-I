@@ -8,6 +8,8 @@ branches:
   only:
     - master
 
+env:
+    - secure: IWSsTa4AxoUCmgaThCkzIrNHrO1VeV1bbQBvIWY0eBnETnUzWZMiWx2VmT3RT8c083sjaAWu6vvcjiTACfB9eFy2/aWN50QfBaESRWNA/qphll0a10NU73SIoIpOju5y64JINM97ASYfFbGZP9BJ6THXPjGYuGpJnHq0K6MR2V5B1vwcAhuMBtS3DUWkCOGmUF1uOKvjQ4iveogBFig1oRY2XmD37FuGlLuwf7QyQ1sN77YiqoOZzeuV4bamGSgEYAsOlRSw2KFETmu5u7w8HzMYlJp6ksZHPQ29BqZ3xy3x+BrXRQNa43tHzjKp0Co506klaMwR5l/vf/sQtFG98A==
 build:
   cache: true
   env:
@@ -31,7 +33,8 @@ integrations:
       on_cancel: change
       on_start: never
       on_pull_request: never
-
+  generic:
+    - integrationName: canvas-where-am-i-github
 resources:
   - name: course-presentation-navigation-repo
     type: gitRepo
@@ -39,3 +42,4 @@ resources:
     pointer:
       sourceName: oxctl/canvas-where-am-i
       branch: master
+
