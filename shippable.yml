@@ -1,0 +1,41 @@
+language: node_js
+
+node_js:
+  - 14.10.1
+
+# PR branches will be built as PRs.
+branches:
+  only:
+    - master
+
+build:
+  cache: true
+  env:
+    # Set environment variable for test results output
+    - XUNIT_FILE=shippable/testresults/result.xml
+  cache_dir_list:
+    - $SHIPPABLE_BUILD_DIR/node_modules
+  ci:
+    - npm install
+    - npm test
+
+integrations:
+  notifications:
+    - integrationName: email
+      type: email
+      recipients:
+        - miguel.pellicer@ctl.ox.ac.uk
+        # Replace Miguel by Oxford staff, ask Matthew about adding him or a different contact for Shippable notifications.
+      on_success: change
+      on_failure: change
+      on_cancel: change
+      on_start: never
+      on_pull_request: never
+
+resources:
+  - name: course-presentation-navigation-repo
+    type: gitRepo
+    integration: github
+    pointer:
+      sourceName: oxctl/canvas-where-am-i
+      branch: master
