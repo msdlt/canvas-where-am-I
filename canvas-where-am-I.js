@@ -250,7 +250,7 @@ window.addEventListener('load', async (event) => {
         // Check if the moduleItemId belongs to this module.
         const currentModuleItem = module.items.find(item => item.id === parseInt(moduleItemId));
         // Check if we need to make one of our sub-menu modules active
-        if (module.id === parseInt(moduleId) || currentModuleItem) {
+        if (module.id === moduleId || currentModuleItem) {
             // Remove the 'active' class of the current menu option.
             const activeOptionMenu = document.querySelector('li.section > a.active');
             activeOptionMenu.classList.remove('active');
@@ -443,7 +443,7 @@ window.addEventListener('load', async (event) => {
         const moduleHashPrefix = 'module_';
         // If the module hash starts with the module_ prefix, remove the prefix to get the Id.
         // Otherwise return 0, moduleId not found
-        return moduleHash.startsWith(moduleHashPrefix) ? moduleHash.replace(moduleHashPrefix, '') : 0;
+        return moduleHash.startsWith(moduleHashPrefix) ? parseInt(moduleHash.replace(moduleHashPrefix, '')) : 0;
     }
 
     /**
