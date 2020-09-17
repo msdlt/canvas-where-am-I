@@ -29,7 +29,7 @@ window.addEventListener('load', async (event) => {
     /* Context variables */
     const initCourseId = ou_getCourseId();  //which course are we in ONLY WORKS ON WEB
     const initDomainId = ou_getDomainRootAccountId(); // The domain ID.
-    const initModuleItemId = ou_getModuleItemId();  //0 or module_item_id from URL (ie only if launched through Modules)
+    const initModuleItemId = ou_getModuleItemId(initCourseId);  //0 or module_item_id from URL (ie only if launched through Modules)
     const initModuleId = ou_getModuleId();  //0 or module being viewed within Modules page
 
     /****************************************/
@@ -425,14 +425,24 @@ window.addEventListener('load', async (event) => {
      * Function which gets find module_item_id from URL - currently ONLY ON WEB
      * @returns {int} id of module_item or 0 for not found
      */
-    function ou_getModuleItemId() {
+    function ou_getModuleItemId(courseId) {
         const moduleRequestUrl = new URL(window.location.href);
         const moduleRequestParams = new URLSearchParams(moduleRequestUrl.search);
         // Get the module item id from the request
         const moduleItemId = moduleRequestParams.get('module_item_id');
         // If the module item id is in the request, return it.
-        // Otherwise return 0
-        return moduleItemId ? parseInt(moduleItemId) : 0;
+        // Otherwise check if it's an external url item or return 0
+        if (moduleItemId) {
+          return parseInt(moduleItemId);
+        } else {
+          // Some items like external URLs are not referenced by a request parameter, they have a different pattern.
+          const moduleItemPath = `/courses/${courseId}/modules/items/`;
+          if (moduleRequestUrl.href.includes(moduleItemPath)) {
+            return parseInt(window.location.pathname.replace(moduleItemPath, ''));
+          } else {
+            return 0;
+          }
+        }
     }
 
     /**
