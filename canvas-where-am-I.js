@@ -117,7 +117,10 @@
                     moduleNav = document.createElement("div");
                     moduleNav.id = "module_nav";
                     moduleNav.className = "ou-ModuleCard__box";
-                    moduleNav.innerHTML = '<a id="module_nav_anchor"></a>';
+                    //moduleNav.innerHTML = '<a id="module_nav_anchor"></a>';
+                    let moduleNavAnchorLink = document.createElement('a');
+                    moduleNavAnchorLink.id = 'module_nav_anchor';
+                    moduleNav.appendChild(moduleNavAnchorLink);
                     divContent.insertBefore(moduleNav, divContent.childNodes[0]); //insert moduleNav onto page
                     
                     divCourseHomeContent.style.display = 'none'; 
@@ -265,7 +268,8 @@
                         moduleTileTitle.classList.add("ellipsis");
                         moduleTileTitle.title = module.name;
                         moduleTileTitle.style.color = moduleColours[mindex];
-                        moduleTileTitle.innerHTML = module.name; 
+                        //moduleTileTitle.innerHTML = module.name; 
+                        moduleTileTitle.appendChild(document.createTextNode(module.name)); 
 
                         /*if(showItemLinks && module.items.length > 0) {
                             //only add actions if required
@@ -319,7 +323,8 @@
                     }
                     newLink.title = module.name;
                     newLink.href = '/courses/' + courseId + '/modules/' + module.id;   
-                    newLink.innerHTML = module.name;
+                    //newLink.innerHTML = module.name;
+                    newLink.appendChild(document.createTextNode(module.name)); 
                     newItem.appendChild(newLink);
                 });
                 var liModules = aModules.parentNode;
