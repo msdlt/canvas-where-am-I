@@ -5,7 +5,7 @@
 // TODO can we refresh menu when editing Modules?
 
 // All the logic should be performed after the load event so we have all the elements loaded.
-window.addEventListener('load', async (event) => {
+(async function () {
 
     /****************************************/
     /**** Start of Configuration Section ****/
@@ -75,16 +75,27 @@ window.addEventListener('load', async (event) => {
     }
 
     if (initModuleItemId) {
-      // Get the footer by id, in many pages the id is sequence_footer, in the last page the id is module_navigation_target
-      const divFooter = document.querySelector('#module_navigation_target, #sequence_footer');
-      const divFooterContent = divFooter.querySelector('.module-sequence-footer-content');
-      if (divFooterContent) {
-        const currentModule = courseModules.find(module => module.items.find(moduleItem => moduleItem.id === initModuleItemId));
-        const moduleItemsForProgress = ou_getModuleItemsForProgress(initCourseId, initModuleItemId, currentModule);
-        const progressBarDiv = ou_buildProgressBar(moduleItemsForProgress);
-        // Place new progressBarContainer in the middle flexible div
-        divFooterContent.appendChild(progressBarDiv);
-      }
+      // The footer and navigation buttons are rendered by JS and sometimes this happens before they are rendered, wait until gets a value.
+      const sequenceFooterId = '.module-sequence-footer-content';
+      let divFooterContent = document.querySelector(sequenceFooterId);
+      const maxRetries = 100;
+      let retryNumber = 0;
+      let checkFooterExist = setInterval(() => {
+        divFooterContent = document.querySelector(sequenceFooterId);
+        retryNumber++;
+        if (retryNumber >= maxRetries) {
+          clearInterval(checkFooterExist);
+          return;
+        }
+        if (divFooterContent) {
+          const currentModule = courseModules.find(module => module.items.find(moduleItem => moduleItem.id === initModuleItemId));
+          const moduleItemsForProgress = ou_getModuleItemsForProgress(initCourseId, initModuleItemId, currentModule);
+          const progressBarDiv = ou_buildProgressBar(moduleItemsForProgress);
+          // Place new progressBarContainer in the middle flexible div
+          divFooterContent.appendChild(progressBarDiv);
+          clearInterval(checkFooterExist);
+        }
+      }, 100);
     }
 
 
@@ -484,4 +495,4 @@ window.addEventListener('load', async (event) => {
     /***** End of function definitions ******/
     /****************************************/
 
-});
+})();
