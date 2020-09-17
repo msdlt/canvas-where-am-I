@@ -79,7 +79,7 @@ window.addEventListener('load', async (event) => {
       const divFooter = document.querySelector('#module_navigation_target, #sequence_footer');
       const divFooterContent = divFooter.querySelector('.module-sequence-footer-content');
       if (divFooterContent) {
-        const currentModule = courseModules.find(module => module.items.find(moduleItem => moduleItem.id === parseInt(initModuleItemId)));
+        const currentModule = courseModules.find(module => module.items.find(moduleItem => moduleItem.id === initModuleItemId));
         const moduleItemsForProgress = ou_getModuleItemsForProgress(initCourseId, initModuleItemId, currentModule);
         const progressBarDiv = ou_buildProgressBar(moduleItemsForProgress);
         // Place new progressBarContainer in the middle flexible div
@@ -248,7 +248,7 @@ window.addEventListener('load', async (event) => {
         }
 
         // Check if the moduleItemId belongs to this module.
-        const currentModuleItem = module.items.find(item => item.id === parseInt(moduleItemId));
+        const currentModuleItem = module.items.find(item => item.id === moduleItemId);
         // Check if we need to make one of our sub-menu modules active
         if (module.id === moduleId || currentModuleItem) {
             // Remove the 'active' class of the current menu option.
@@ -283,7 +283,7 @@ window.addEventListener('load', async (event) => {
 
           const listItemDest = `/courses/${courseId}/modules/items/${itemId}`;
           // note only want to do this for current module
-          let isCurrentItem = parseInt(moduleItemId) == parseInt(item.id);
+          let isCurrentItem = moduleItemId === item.id;
           let itemNavObject = {
               href: listItemDest,
               title: item.title,
@@ -430,7 +430,7 @@ window.addEventListener('load', async (event) => {
         const moduleItemId = moduleRequestParams.get('module_item_id');
         // If the module item id is in the request, return it.
         // Otherwise return 0
-        return moduleItemId ? moduleItemId : 0;
+        return moduleItemId ? parseInt(moduleItemId) : 0;
     }
 
     /**
