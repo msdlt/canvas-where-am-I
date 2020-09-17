@@ -165,7 +165,9 @@ window.addEventListener('load', async (event) => {
       let moduleNav = document.createElement('div');
       moduleNav.id = 'module_nav';
       moduleNav.className = 'ou-ModuleCard__box';
-      moduleNav.innerHTML = '<a id="module_nav_anchor"></a>';
+      let moduleNavAnchorLink = document.createElement('a');
+      moduleNavAnchorLink.id = 'module_nav_anchor';
+      moduleNav.appendChild(moduleNavAnchorLink);
 
       let newRow;
       moduleArray.forEach((module, mindex) => {
@@ -203,7 +205,7 @@ window.addEventListener('load', async (event) => {
         moduleTileTitle.classList.add('ellipsis');
         moduleTileTitle.title = module.name;
         moduleTileTitle.style.color = moduleColours[mindex];
-        moduleTileTitle.innerHTML = module.name;
+        moduleTileTitle.appendChild(document.createTextNode(module.name));
 
         // Only leave space for actions if we're adding them
         moduleTileTitle.classList.add('ou-no-actions');
@@ -242,7 +244,7 @@ window.addEventListener('load', async (event) => {
         newLink.className = 'ou-section-link-sub';
         newLink.title = module.name;
         newLink.href = `/courses/${courseId}/modules/${module.id}`;
-        newLink.innerHTML = module.name;
+        newLink.appendChild(document.createTextNode(module.name));
         if (allowMultilineModuleTitles) {
             newLink.classList.add('ou-multiline');
         }
