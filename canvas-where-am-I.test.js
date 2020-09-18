@@ -9,8 +9,8 @@ jest.setTimeout(1200000);
 let courseObject = {};
 // Contains the modules created in that course.
 let moduleArray = [];
-// Contains an item created in that course
-let moduleItem = {};
+// Contains the items created in one of the modules
+let moduleItems = [];
 
 // Configuration parameters, see .env.example for more information.
 const token = process.env.OAUTH_TOKEN;
@@ -54,16 +54,39 @@ describe('Test the "Canvas Where Am I" most relevant theme integration items.', 
     }
     await Promise.all(promiseArray);
 
-    // Create an item and attach it to the first module.
+    // We want to insert some items on the first module.
     const firstModule = moduleArray[0];
-    const newModuleItem = { module_item: { title: 'Test module item', type: 'ExternalUrl', external_url: 'https://www.ox.ac.uk' } };
+
+    // Create an assignment item and attach it to the first module.
+    let assignment = null;
+    const newAssignment = { assignment: { name: 'Test Assignment' } };
+    await axios({
+      method: 'POST',
+        url: `${host}/api/v1/courses/${courseObject.id}/assignments`,
+      headers: {'Authorization': 'Bearer ' + token},
+      data: newAssignment
+    }).then((response) => {
+      assignment = response.data;
+    });
+
+    const newAssignmentItem = { module_item: { title: newAssignment.name, type: 'assignment', content_id: assignment.id } };
     await axios({
       method: 'POST',
         url: `${host}/api/v1/courses/${courseObject.id}/modules/${firstModule.id}/items`,
       headers: {'Authorization': 'Bearer ' + token},
-      data: newModuleItem
+      data: newAssignmentItem
     }).then((response) => {
-      moduleItem = response.data;
+      moduleItems.push(response.data);
+    });
+
+    const newUrlItem = { module_item: { title: 'Test module item', type: 'ExternalUrl', external_url: 'https://www.ox.ac.uk' } };
+    await axios({
+      method: 'POST',
+        url: `${host}/api/v1/courses/${courseObject.id}/modules/${firstModule.id}/items`,
+      headers: {'Authorization': 'Bearer ' + token},
+      data: newUrlItem
+    }).then((response) => {
+      moduleItems.push(response.data);
     });
 
   });
@@ -99,15 +122,15 @@ describe('Test the "Canvas Where Am I" most relevant theme integration items.', 
     await page.goto(`${host}/courses/${courseObject.id}/modules`);
     const element = await page.$('#context_modules');
     await expect(element).not.toBeNull();
-    const moduleItems = await page.$$('.context_module');
+    const moduleItemElements = await page.$$('.context_module');
     // We add one because Canvas also returns an extra blank module with id context_module_blank
-    await expect(moduleItems.length).toBe(moduleArray.length + 1);
+    await expect(moduleItemElements.length).toBe(moduleArray.length + 1);
 
   });
 
   it('General: Check one module item is created and navigable.', async () => {
-    await page.goto(`${host}/courses/${courseObject.id}/modules/items/${moduleItem.id}`);
-    await expect(page.title()).resolves.toMatch(moduleItem.title);
+    await page.goto(`${host}/courses/${courseObject.id}/modules/items/${moduleItems[0].id}`);
+    await expect(page.title()).resolves.toMatch(moduleItems[0].title);
   });
 
   it('General: Check the Amazon S3 Bucket exists.', async () => {
@@ -150,11 +173,21 @@ describe('Test the "Canvas Where Am I" most relevant theme integration items.', 
   });
 
   it('Progress bar: Check module item footer exists, for the progress bar.', async () => {
-    await page.goto(`${host}/courses/${courseObject.id}/modules/items/${moduleItem.id}`);
+    await page.goto(`${host}/courses/${courseObject.id}/modules/items/${moduleItems[0].id}`);
     const element = await page.$('#sequence_footer');
     await expect(element).not.toBeNull();
     const footerElement = await page.$('.module-sequence-footer-content');
     await expect(footerElement).not.toBeNull();
+  });
+
+  it('Progress bar: Check that a module item has the module_item_id param.', async () => {
+    await page.goto(`${host}/courses/${courseObject.id}/modules/items/${moduleItems[0].id}`);
+    await expect(page.url()).toContain('module_item_id');
+  });
+
+  it('Progress bar: Check that an external url module item has the same request URL.', async () => {
+    await page.goto(`${host}/courses/${courseObject.id}/modules/items/${moduleItems[1].id}`);
+    await expect(page.url()).toBe(`${host}/courses/${courseObject.id}/modules/items/${moduleItems[1].id}`);
   });
 
   it('Modules list: Check the data-module-id attribute exists.', async () => {
