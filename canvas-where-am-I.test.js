@@ -180,12 +180,12 @@ describe('Test the "Canvas Where Am I" most relevant theme integration items.', 
     await expect(footerElement).not.toBeNull();
   });
 
-  it('Progress bar: Check that a module item has the module_item_id param.', async () => {
+  it('Progress bar: Check the method to get the moduleItemId from the module_item_id param.', async () => {
     await page.goto(`${host}/courses/${courseObject.id}/modules/items/${moduleItems[0].id}`);
     await expect(page.url()).toContain('module_item_id');
   });
 
-  it('Progress bar: Check that an external url module item has the same request URL.', async () => {
+  it('Progress bar: Check the method to get the moduleItemId from an external url module item.', async () => {
     await page.goto(`${host}/courses/${courseObject.id}/modules/items/${moduleItems[1].id}`);
     await expect(page.url()).toBe(`${host}/courses/${courseObject.id}/modules/items/${moduleItems[1].id}`);
   });
@@ -199,6 +199,11 @@ describe('Test the "Canvas Where Am I" most relevant theme integration items.', 
     // Check that we get all the items except the first one, we leave the expresson + 1 - 1 for clarity.
     // We add one because Canvas also returns an extra blank module with id context_module_blank
     await expect(itemsToRemove.length).toBe(moduleArray.length + 1 - 1);
+  });
+
+  it('Modules list: Check the method to get the moduleId from the hash.', async () => {
+    await page.goto(`${host}/courses/${courseObject.id}/modules/${moduleArray[0].id}`);
+    await expect(page.url()).toBe(`${host}/courses/${courseObject.id}/modules#module_${moduleArray[0].id}`);
   });
 
 });
