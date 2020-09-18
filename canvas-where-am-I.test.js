@@ -154,6 +154,19 @@ describe('Test the "Canvas Where Am I" most relevant theme integration items.', 
     await expect(domainAccountId).not.toBeNull();
   });
 
+  it('General: Check the modules API returns the module objects of the course.', async () => {
+    const moduleRequest = `${host}/api/v1/courses/${courseObject.id}/modules?per_page=100`;
+    let courseModules = [];
+    await axios({
+      method: 'GET',
+      url: moduleRequest,
+      headers: {'Authorization': 'Bearer ' + token}
+    }).then((response) => {
+      courseModules = response.data;
+    });
+    await expect(courseModules.length).toBe(moduleArray.length);
+  });
+
   it('Tile View: Check course_home_content DIV exists.', async () => {
     await page.goto(`${host}/courses/${courseObject.id}`);
     const element = await page.$('#course_home_content');
