@@ -16,6 +16,7 @@ let moduleItem = {};
 const token = process.env.OAUTH_TOKEN;
 const host = process.env.CANVAS_HOST;
 const account = process.env.ACCOUNT_ID;
+const amazonBucketUrl = process.env.AMAZON_S3_BUCKET_URL;
 
 describe('Test the "Canvas Where Am I" most relevant theme integration items.', () => {
 
@@ -23,6 +24,7 @@ describe('Test the "Canvas Where Am I" most relevant theme integration items.', 
     assert(token, 'You must set the environmental variable OAUTH_TOKEN');
     assert(host, 'You must set the environmental variable CANVAS_HOST');
     assert(account, 'You must set the environmental variable ACCOUNT_ID');
+    assert(amazonBucketUrl, 'You must set the environmental variable AMAZON_S3_BUCKET_URL');
 
     // Creates a course in the instance to check the navigation.
     const course = { course: { name: 'IGNORE: CPN TESTING', course_code: 'ignore_cpn_testing', default_view: 'modules' } };
@@ -88,12 +90,12 @@ describe('Test the "Canvas Where Am I" most relevant theme integration items.', 
     ]);
   });
 
-  it('Check the course is created and navigable.', async () => {
+  it('General: Check the course is created and navigable.', async () => {
     await page.goto(`${host}/courses/${courseObject.id}`);
     await expect(page.title()).resolves.toMatch(courseObject.name);
   });
 
-  it('Check modules have been created.', async () => {
+  it('General: Check modules have been created.', async () => {
     await page.goto(`${host}/courses/${courseObject.id}/modules`);
     const element = await page.$('#context_modules');
     await expect(element).not.toBeNull();
@@ -103,9 +105,30 @@ describe('Test the "Canvas Where Am I" most relevant theme integration items.', 
 
   });
 
-  it('Check one module item is created and navigable.', async () => {
+  it('General: Check one module item is created and navigable.', async () => {
     await page.goto(`${host}/courses/${courseObject.id}/modules/items/${moduleItem.id}`);
     await expect(page.title()).resolves.toMatch(moduleItem.title);
+  });
+
+  it('General: Check the Amazon S3 Bucket exists.', async () => {
+    await page.goto(amazonBucketUrl);
+    await expect(page.content()).resolves.toContain('<Message>Access Denied</Message>');
+  });
+
+  it('General: Check the COURSE_ID is in the ENV variable.', async () => {
+    await page.goto(`${host}/courses/${courseObject.id}/modules`);
+    const courseId = await page.evaluate(() => {
+      return ENV.COURSE_ID || ENV.course_id;
+    });
+    await expect(parseInt(courseId)).toBe(courseObject.id);
+  });
+
+  it('General: Check the DOMAIN_ROOT_ACCOUNT_ID is in the ENV variable.', async () => {
+    await page.goto(`${host}/courses/${courseObject.id}/modules`);
+    const domainAccountId = await page.evaluate(() => {
+      return ENV.DOMAIN_ROOT_ACCOUNT_ID;
+    });
+    await expect(domainAccountId).not.toBeNull();
   });
 
   it('Tile View: Check course_home_content DIV exists.', async () => {
@@ -132,6 +155,17 @@ describe('Test the "Canvas Where Am I" most relevant theme integration items.', 
     await expect(element).not.toBeNull();
     const footerElement = await page.$('.module-sequence-footer-content');
     await expect(footerElement).not.toBeNull();
+  });
+
+  it('Modules list: Check the data-module-id attribute exists.', async () => {
+    await page.goto(`${host}/courses/${courseObject.id}/modules`);
+    const modules = await page.$$('div.context_module');
+    // We add one because Canvas also returns an extra blank module with id context_module_blank
+    await expect(modules.length).toBe(moduleArray.length + 1);
+    const itemsToRemove = await page.$$(`div.context_module:not([data-module-id='${moduleArray[0].id}'])`);
+    // Check that we get all the items except the first one, we leave the expresson + 1 - 1 for clarity.
+    // We add one because Canvas also returns an extra blank module with id context_module_blank
+    await expect(itemsToRemove.length).toBe(moduleArray.length + 1 - 1);
   });
 
 });
