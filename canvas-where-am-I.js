@@ -204,9 +204,10 @@
         let moduleTileLink = document.createElement('a');
         moduleTileLink.href = `/courses/${courseId}/modules/${module.id}`;
 
+        const colorIndex = mindex % moduleColours.length;
         let moduleTileHeader = document.createElement('div');
         moduleTileHeader.className = 'ou-ModuleCard__header_hero_short';
-        moduleTileHeader.style.backgroundColor = moduleColours[mindex];
+        moduleTileHeader.style.backgroundColor = moduleColours[colorIndex];
 
         let moduleTileContent = document.createElement('div');
         moduleTileContent.className = 'ou-ModuleCard__header_content';
@@ -215,7 +216,7 @@
         moduleTileTitle.classList.add('ou-ModuleCard__header-title');
         moduleTileTitle.classList.add('ellipsis');
         moduleTileTitle.title = module.name;
-        moduleTileTitle.style.color = moduleColours[mindex];
+        moduleTileTitle.style.color = moduleColours[colorIndex];
         moduleTileTitle.appendChild(document.createTextNode(module.name));
 
         // Only leave space for actions if we're adding them
