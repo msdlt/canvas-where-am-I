@@ -56,7 +56,7 @@
         ou_removeOtherModules(initModuleId);
     }
 
-    const courseModules = await ou_getModules(initCourseId);
+    const courseModules = await ou_getModules(initCourseId, null);
     const isCourseHome = divContextModulesContainer && !initModuleId && divCourseHomeContent;
     // If the user is in the course home and contains modules, replace the standard view by the tile view.
     if (isCourseHome) {
@@ -130,18 +130,34 @@
      * Gets the module objects for a courseId querying the Canvas API.
      * https://canvas.instructure.com/doc/api/modules.html#Module
      */
-    async function ou_getModules(courseId) {
-      // Added &per_page=100, otherwise only returns the first 10
-      const moduleRequest = `/api/v1/courses/${courseId}/modules?include=items&per_page=100`;
-      const courseModules = await fetch(moduleRequest, {
+    async function ou_getModules(courseId, pageUrl) {
+      // The module API is pageable so it needs to be iterative.
+      const moduleRequest = !pageUrl ? `/api/v1/courses/${courseId}/modules?include=items&per_page=100` : pageUrl;
+      let courseModules = await fetch(moduleRequest, {
         method: 'GET',
         credentials: 'include',
         headers: {
           'Accept': 'application/json',
         }
       }).then(ou_status)
-      .then(ou_json)
-      .then((moduleArray) => {return moduleArray;})
+      .then(async response => {
+        let modulePage = await response.json();
+        // As the API is pageable, we need to get the modules for each page.
+        // Gets the link header.
+        const linkHeader = response.headers.get('link');
+        // As we do not use external libraries, we get the next page manually.
+        const parts = linkHeader.split(',');
+        const nextPage = parts.find(part => part.includes('rel="next"'));
+        if (nextPage) {
+          // Remove the control characters to get the URL.
+          const nextPageUrl = nextPage.replace('>; rel="next"', '').replace('<','');
+          // Get the modules of the next page recursively and add them to the module list.
+          const nextPageModules = await ou_getModules(courseId, nextPageUrl);
+          modulePage = modulePage.concat(nextPageModules);
+        }
+        // We only return the modules when is the last page, there is no next page.
+        return modulePage;
+      })
       .catch(function(error) {
         console.log('Failed to get course modules', error);
         return [];
