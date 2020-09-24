@@ -57,6 +57,12 @@
     }
 
     const courseModules = await ou_getModules(initCourseId, null);
+
+    // All the logic does not make sense in empty courses.
+    if (!courseModules.length) {
+      return;
+    }
+
     const isCourseHome = divContextModulesContainer && !initModuleId && divCourseHomeContent;
     // If the user is in the course home and contains modules, replace the standard view by the tile view.
     if (isCourseHome) {
