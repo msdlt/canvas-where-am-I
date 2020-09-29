@@ -18,6 +18,10 @@ const host = process.env.CANVAS_HOST;
 const account = process.env.ACCOUNT_ID;
 const amazonBucketUrl = process.env.AMAZON_S3_BUCKET_URL;
 
+getRandomModule = () => {
+  return moduleArray[Math.floor(Math.random() * moduleArray.length)];
+}
+
 describe('Test the "Canvas Where Am I" most relevant theme integration items.', () => {
 
   beforeAll(async () => {
@@ -204,10 +208,54 @@ describe('Test the "Canvas Where Am I" most relevant theme integration items.', 
     await expect(element).not.toBeNull();
   });
 
+  it('Tile View: Check the standard view has been replaced by the tile view.', async () => {
+    await page.goto(`${host}/courses/${courseObject.id}`);
+    await page.evaluate(() => ENV['FORCE_CPN'] = true);
+    await Promise.all([
+      page.addScriptTag({ path: './canvas-where-am-I.js' }),
+      page.addStyleTag({ path: './canvas-where-am-I.css' }),
+    ]);
+    // The script replaces the course_home_content by module_nav.
+    const selector = '#module_nav';
+    await page.waitForSelector(selector);
+    const moduleNav = await page.$(selector);
+    await expect(moduleNav).not.toBeNull();
+    const courseHomeContent = await page.$('#course_home_content');
+    await expect(courseHomeContent).toBeNull();
+  });
+
+  it('Tile View: Check the standard view of the modules have been replaced by cards.', async () => {
+    await page.goto(`${host}/courses/${courseObject.id}`);
+    await page.evaluate(() => ENV['FORCE_CPN'] = true);
+    await Promise.all([
+      page.addScriptTag({ path: './canvas-where-am-I.js' }),
+      page.addStyleTag({ path: './canvas-where-am-I.css' }),
+    ]);
+    // The script replaces the course_home_content by module_nav.
+    await page.waitForSelector('#module_nav');
+    const modules = await page.$$('.ou-ModuleCard');
+    await expect(modules.length).toBe(moduleArray.length);
+  });
+
   it('Modules submenu: Check modules tool menu item exists.', async () => {
     await page.goto(`${host}/courses/${courseObject.id}`);
     const element = await page.$$('li.section a.modules');
     await expect(element).not.toBeNull();
+  });
+
+  it('Modules submenu: Check the selected module is highlighted in the LHS menu.', async () => {
+    const randomModule = getRandomModule();
+    await page.goto(`${host}/courses/${courseObject.id}/modules/${randomModule.id}`);
+    await page.evaluate(() => ENV['FORCE_CPN'] = true);
+    await Promise.all([
+      page.addScriptTag({ path: './canvas-where-am-I.js' }),
+      page.addStyleTag({ path: './canvas-where-am-I.css' }),
+    ]);
+    await page.waitForSelector('.ou-section-tabs-sub');
+    // The script replaces the course_home_content by module_nav.
+    const selectedLHSItem = await page.$('li.section a.active');
+    const selectedModuleName = await page.evaluate(selectedLHSItem => selectedLHSItem.textContent, selectedLHSItem);
+    await expect(selectedModuleName).toBe(randomModule.name);
   });
 
   it('Progress bar: Check module item footer exists, for the progress bar.', async () => {
@@ -229,19 +277,21 @@ describe('Test the "Canvas Where Am I" most relevant theme integration items.', 
   });
 
   it('Modules list: Check the data-module-id attribute exists.', async () => {
+    const randomModule = getRandomModule();
     await page.goto(`${host}/courses/${courseObject.id}/modules`);
     const modules = await page.$$('div.context_module');
     // We add one because Canvas also returns an extra blank module with id context_module_blank
     await expect(modules.length).toBe(moduleArray.length + 1);
-    const itemsToRemove = await page.$$(`div.context_module:not([data-module-id='${moduleArray[0].id}'])`);
+    const itemsToRemove = await page.$$(`div.context_module:not([data-module-id='${randomModule.id}'])`);
     // Check that we get all the items except the first one, we leave the expresson + 1 - 1 for clarity.
     // We add one because Canvas also returns an extra blank module with id context_module_blank
     await expect(itemsToRemove.length).toBe(moduleArray.length + 1 - 1);
   });
 
   it('Modules list: Check the method to get the moduleId from the hash.', async () => {
-    await page.goto(`${host}/courses/${courseObject.id}/modules/${moduleArray[0].id}`);
-    await expect(page.url()).toBe(`${host}/courses/${courseObject.id}/modules#module_${moduleArray[0].id}`);
+    const randomModule = getRandomModule();
+    await page.goto(`${host}/courses/${courseObject.id}/modules/${randomModule.id}`);
+    await expect(page.url()).toBe(`${host}/courses/${courseObject.id}/modules#module_${randomModule.id}`);
   });
 
 });
