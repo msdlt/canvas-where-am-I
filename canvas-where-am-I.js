@@ -1,10 +1,3 @@
-/**** TODO LIST ****/
-// TODO Check that we have added icons for all itemTypes
-// TODO Check that we haven't lost any of Canvas's accessibility features
-// TODO investigate whether we could limit Module titles in LH menu to e.g two lines
-// TODO can we refresh menu when editing Modules?
-
-// All the logic should be performed after the load event so we have all the elements loaded.
 (async function () {
 
     /****************************************/
@@ -214,7 +207,6 @@
         var newColumn = document.createElement('div');
 
         // create column wrapper
-        // TODO work out classes for noOfColumnsPerRow != 4
         newColumn.className = 'col-xs-12 col-sm-6 col-lg-3';
         newRow.appendChild(newColumn);
 
