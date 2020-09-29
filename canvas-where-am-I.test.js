@@ -186,6 +186,12 @@ describe('Test the "Canvas Where Am I" most relevant theme integration items.', 
     await expect(element).not.toBeNull();
   });
 
+  it('Tile View: Check content DIV exists.', async () => {
+    await page.goto(`${host}/courses/${courseObject.id}`);
+    const element = await page.$('#content');
+    await expect(element).not.toBeNull();
+  });
+
   it('Tile View: Check context_modules_sortable_container DIV exists.', async () => {
     await page.goto(`${host}/courses/${courseObject.id}`);
     const element = await page.$('#context_modules_sortable_container');
