@@ -258,6 +258,20 @@ describe('Test the "Canvas Where Am I" most relevant theme integration items.', 
     await expect(selectedModuleName).toBe(randomModule.name);
   });
 
+  it('Modules submenu: Check the selected module is highlighted in the LHS menu when accessing an item.', async () => {
+    await page.goto(`${host}/courses/${courseObject.id}/modules/items/${moduleItems[0].id}`);
+    await page.evaluate(() => ENV['FORCE_CPN'] = true);
+    await Promise.all([
+      page.addScriptTag({ path: './canvas-where-am-I.js' }),
+      page.addStyleTag({ path: './canvas-where-am-I.css' }),
+    ]);
+    await page.waitForSelector('.ou-section-tabs-sub');
+    // The script replaces the course_home_content by module_nav.
+    const selectedLHSItem = await page.$('li.section a.active');
+    const selectedModuleName = await page.evaluate(selectedLHSItem => selectedLHSItem.textContent, selectedLHSItem);
+    await expect(selectedModuleName).toBe(moduleArray[0].name);
+  });
+
   it('Progress bar: Check module item footer exists, for the progress bar.', async () => {
     await page.goto(`${host}/courses/${courseObject.id}/modules/items/${moduleItems[0].id}`);
     const element = await page.$('#sequence_footer');
@@ -292,6 +306,34 @@ describe('Test the "Canvas Where Am I" most relevant theme integration items.', 
     const randomModule = getRandomModule();
     await page.goto(`${host}/courses/${courseObject.id}/modules/${randomModule.id}`);
     await expect(page.url()).toBe(`${host}/courses/${courseObject.id}/modules#module_${randomModule.id}`);
+  });
+
+  it('Modules list: Check the script does not perform changes to modules.', async () => {
+    await page.goto(`${host}/courses/${courseObject.id}/modules`);
+    await page.evaluate(() => ENV['FORCE_CPN'] = true);
+    await Promise.all([
+      page.addScriptTag({ path: './canvas-where-am-I.js' }),
+      page.addStyleTag({ path: './canvas-where-am-I.css' }),
+    ]);
+    const modulesSelector = 'div.context_module';
+    await page.waitForSelector(modulesSelector);
+    const modules = await page.$$(modulesSelector);
+    // We add one because Canvas also returns an extra blank module with id context_module_blank
+    await expect(modules.length).toBe(moduleArray.length + 1);
+  });
+
+  it('Modules list: Check the script filters the other modules when accessing a module.', async () => {
+    const randomModule = getRandomModule();
+    await page.goto(`${host}/courses/${courseObject.id}/modules/${randomModule.id}`);
+    await page.evaluate(() => ENV['FORCE_CPN'] = true);
+    await Promise.all([
+      page.addScriptTag({ path: './canvas-where-am-I.js' }),
+      page.addStyleTag({ path: './canvas-where-am-I.css' }),
+    ]);
+    const modulesSelector = 'div.context_module';
+    await page.waitForSelector(modulesSelector);
+    const modules = await page.$$(modulesSelector);
+    await expect(modules.length).toBe(1);
   });
 
 });
