@@ -38,7 +38,8 @@
       return;
     }
 
-    const isTileViewEnabled = await ou_CheckSettings(initDomainId, initCourseId);
+    // If the FORCE_CPN variable is appended to the ENV object, bypass the S3 bucket check and enable the feature for the course.
+    const isTileViewEnabled = ENV.FORCE_CPN || await ou_CheckSettings(initDomainId, initCourseId);
     // Only perform the course presentation and navigation logic if it is enabled in the course CPN settings.
     if (!isTileViewEnabled) {
       return;
