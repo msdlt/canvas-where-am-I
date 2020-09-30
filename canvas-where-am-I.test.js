@@ -22,6 +22,10 @@ getRandomModule = () => {
   return moduleArray[Math.floor(Math.random() * moduleArray.length)];
 }
 
+getRandomModuleItem = () => {
+  return moduleItems[Math.floor(Math.random() * moduleItems.length)];
+}
+
 describe('Test the "Canvas Where Am I" most relevant theme integration items.', () => {
 
   beforeAll(async () => {
@@ -288,6 +292,38 @@ describe('Test the "Canvas Where Am I" most relevant theme integration items.', 
   it('Progress bar: Check the method to get the moduleItemId from an external url module item.', async () => {
     await page.goto(`${host}/courses/${courseObject.id}/modules/items/${moduleItems[1].id}`);
     await expect(page.url()).toBe(`${host}/courses/${courseObject.id}/modules/items/${moduleItems[1].id}`);
+  });
+
+  it('Progress bar: Check progress bar is rendered after performing the script.', async () => {
+    await page.goto(`${host}/courses/${courseObject.id}/modules/items/${moduleItems[0].id}`);
+    await page.evaluate(() => ENV['FORCE_CPN'] = true);
+    await Promise.all([
+      page.addScriptTag({ path: './canvas-where-am-I.js' }),
+      page.addStyleTag({ path: './canvas-where-am-I.css' }),
+    ]);
+    // The progress bar is added to the footer.
+    const footerContainerSelector = '.ou-ColContainer';
+    await page.waitForSelector(footerContainerSelector);
+    const footerContainerElement = await page.$(footerContainerSelector);
+    await expect(footerContainerElement).not.toBeNull();
+    const progressBarItems = await page.$$('li.ou-progress-item');
+    await expect(progressBarItems.length).toBe(moduleItems.length);
+  });
+
+  it('Progress bar: Check the right item is selected in the progress bar.', async () => {
+    const randomModuleItem = getRandomModuleItem();
+    await page.goto(`${host}/courses/${courseObject.id}/modules/items/${randomModuleItem.id}`);
+    await page.evaluate(() => ENV['FORCE_CPN'] = true);
+    await Promise.all([
+      page.addScriptTag({ path: './canvas-where-am-I.js' }),
+      page.addStyleTag({ path: './canvas-where-am-I.css' }),
+    ]);
+    const footerContainerSelector = '.ou-ColContainer';
+    await page.waitForSelector(footerContainerSelector);
+    // Query the selected item and check it's the same moduleItem.
+    const selectedProgressBarItem = await page.$('li.ou-progress-item a.active');
+    const selectedModuleItemName = await (await selectedProgressBarItem.getProperty('title')).jsonValue();
+    await expect(selectedModuleItemName).toBe(randomModuleItem.title);
   });
 
   it('Modules list: Check the data-module-id attribute exists.', async () => {
