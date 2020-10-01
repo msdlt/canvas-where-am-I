@@ -17,7 +17,19 @@ getRandomModule = () => {
   return moduleArray[Math.floor(Math.random() * moduleArray.length)];
 }
 
-describe('Test the "Canvas Where Am I" script with an empty course.', () => {
+goToCourse = async (page) => {
+  await page.goto(`${host}/courses/${courseObject.id}`);
+}
+
+appendCPNScript = async (page) => {
+  await page.evaluate(() => ENV['FORCE_CPN'] = true);
+  await Promise.all([
+    page.addScriptTag({ path: './canvas-where-am-I.js' }),
+    page.addStyleTag({ path: './canvas-where-am-I.css' }),
+  ]);
+}
+
+describe('Test the CPN script logic with an empty course.', () => {
 
   beforeAll(async () => {
     assert(token, 'You must set the environmental variable OAUTH_TOKEN');
@@ -60,23 +72,19 @@ describe('Test the "Canvas Where Am I" script with an empty course.', () => {
   });
 
   it('General: Check the course is created and navigable.', async () => {
-    await page.goto(`${host}/courses/${courseObject.id}`);
+    await goToCourse(page);
     await expect(page.title()).resolves.toMatch(courseObject.name);
   });
 
   it('Tile View: Check content DIV exists.', async () => {
-    await page.goto(`${host}/courses/${courseObject.id}`);
+    await goToCourse(page);
     const element = await page.$('#content');
     await expect(element).not.toBeNull();
   });
 
   it('Tile View: Check the script does not make any changes in the home page.', async () => {
-    await page.goto(`${host}/courses/${courseObject.id}`);
-    await page.evaluate(() => ENV['FORCE_CPN'] = true);
-    await Promise.all([
-      page.addScriptTag({ path: './canvas-where-am-I.js' }),
-      page.addStyleTag({ path: './canvas-where-am-I.css' }),
-    ]);
+    await goToCourse(page);
+    await appendCPNScript(page);
     // Check the message that there are no courses
     const noModulesMessage = await page.$('#no_context_modules_message');
     await expect(noModulesMessage).not.toBeNull();
@@ -101,12 +109,8 @@ describe('Test the "Canvas Where Am I" script with an empty course.', () => {
       data: 'course[default_view]=feed'
     });
 
-    await page.goto(`${host}/courses/${courseObject.id}`);
-    await page.evaluate(() => ENV['FORCE_CPN'] = true);
-    await Promise.all([
-      page.addScriptTag({ path: './canvas-where-am-I.js' }),
-      page.addStyleTag({ path: './canvas-where-am-I.css' }),
-    ]);
+    await goToCourse(page);
+    await appendCPNScript(page);
     // Check the home page is feed and not modules
     const noModulesMessage = await page.$('#no_context_modules_message');
     await expect(noModulesMessage).toBeNull();
@@ -121,12 +125,8 @@ describe('Test the "Canvas Where Am I" script with an empty course.', () => {
   });
 
   it('Modules submenu: Check the script does not make any changes in LHS menu.', async () => {
-    await page.goto(`${host}/courses/${courseObject.id}`);
-    await page.evaluate(() => ENV['FORCE_CPN'] = true);
-    await Promise.all([
-      page.addScriptTag({ path: './canvas-where-am-I.js' }),
-      page.addStyleTag({ path: './canvas-where-am-I.css' }),
-    ]);
+    await goToCourse(page);
+    await appendCPNScript(page);
     const modulesToolLink = await page.$$('li.section a.modules');
     await expect(modulesToolLink).not.toBeNull();
     const submenuElement = await page.$('.ou-section-tabs-sub');
@@ -134,12 +134,8 @@ describe('Test the "Canvas Where Am I" script with an empty course.', () => {
   });
 
   it('Modules submenu: Check the script does not make any changes in LHS menu.', async () => {
-    await page.goto(`${host}/courses/${courseObject.id}`);
-    await page.evaluate(() => ENV['FORCE_CPN'] = true);
-    await Promise.all([
-      page.addScriptTag({ path: './canvas-where-am-I.js' }),
-      page.addStyleTag({ path: './canvas-where-am-I.css' }),
-    ]);
+    await goToCourse(page);
+    await appendCPNScript(page);
     const modulesToolLink = await page.$$('li.section a.modules');
     await expect(modulesToolLink).not.toBeNull();
     const submenuElement = await page.$('.ou-section-tabs-sub');

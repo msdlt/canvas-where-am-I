@@ -22,11 +22,7 @@ getRandomModule = () => {
   return moduleArray[Math.floor(Math.random() * moduleArray.length)];
 }
 
-getRandomModuleItem = () => {
-  return moduleItems[Math.floor(Math.random() * moduleItems.length)];
-}
-
-describe('Test the "Canvas Where Am I" most relevant theme integration items.', () => {
+describe('Test the CPN most relevant DOM elements, functions, Canvas API and Amazon S3 Bucket.', () => {
 
   beforeAll(async () => {
     assert(token, 'You must set the environmental variable OAUTH_TOKEN');
@@ -133,7 +129,6 @@ describe('Test the "Canvas Where Am I" most relevant theme integration items.', 
     const moduleItemElements = await page.$$('.context_module');
     // We add one because Canvas also returns an extra blank module with id context_module_blank
     await expect(moduleItemElements.length).toBe(moduleArray.length + 1);
-
   });
 
   it('General: Check one module item is created and navigable.', async () => {
@@ -212,70 +207,6 @@ describe('Test the "Canvas Where Am I" most relevant theme integration items.', 
     await expect(element).not.toBeNull();
   });
 
-  it('Tile View: Check the standard view has been replaced by the tile view.', async () => {
-    await page.goto(`${host}/courses/${courseObject.id}`);
-    await page.evaluate(() => ENV['FORCE_CPN'] = true);
-    await Promise.all([
-      page.addScriptTag({ path: './canvas-where-am-I.js' }),
-      page.addStyleTag({ path: './canvas-where-am-I.css' }),
-    ]);
-    // The script replaces the course_home_content by module_nav.
-    const selector = '#module_nav';
-    await page.waitForSelector(selector);
-    const moduleNav = await page.$(selector);
-    await expect(moduleNav).not.toBeNull();
-    const courseHomeContent = await page.$('#course_home_content');
-    await expect(courseHomeContent).toBeNull();
-  });
-
-  it('Tile View: Check the standard view of the modules have been replaced by cards.', async () => {
-    await page.goto(`${host}/courses/${courseObject.id}`);
-    await page.evaluate(() => ENV['FORCE_CPN'] = true);
-    await Promise.all([
-      page.addScriptTag({ path: './canvas-where-am-I.js' }),
-      page.addStyleTag({ path: './canvas-where-am-I.css' }),
-    ]);
-    // The script replaces the course_home_content by module_nav.
-    await page.waitForSelector('#module_nav');
-    const modules = await page.$$('.ou-ModuleCard');
-    await expect(modules.length).toBe(moduleArray.length);
-  });
-
-  it('Modules submenu: Check modules tool menu item exists.', async () => {
-    await page.goto(`${host}/courses/${courseObject.id}`);
-    const element = await page.$$('li.section a.modules');
-    await expect(element).not.toBeNull();
-  });
-
-  it('Modules submenu: Check the selected module is highlighted in the LHS menu.', async () => {
-    const randomModule = getRandomModule();
-    await page.goto(`${host}/courses/${courseObject.id}/modules/${randomModule.id}`);
-    await page.evaluate(() => ENV['FORCE_CPN'] = true);
-    await Promise.all([
-      page.addScriptTag({ path: './canvas-where-am-I.js' }),
-      page.addStyleTag({ path: './canvas-where-am-I.css' }),
-    ]);
-    await page.waitForSelector('.ou-section-tabs-sub');
-    // The script replaces the course_home_content by module_nav.
-    const selectedLHSItem = await page.$('li.section a.active');
-    const selectedModuleName = await page.evaluate(selectedLHSItem => selectedLHSItem.textContent, selectedLHSItem);
-    await expect(selectedModuleName).toBe(randomModule.name);
-  });
-
-  it('Modules submenu: Check the selected module is highlighted in the LHS menu when accessing an item.', async () => {
-    await page.goto(`${host}/courses/${courseObject.id}/modules/items/${moduleItems[0].id}`);
-    await page.evaluate(() => ENV['FORCE_CPN'] = true);
-    await Promise.all([
-      page.addScriptTag({ path: './canvas-where-am-I.js' }),
-      page.addStyleTag({ path: './canvas-where-am-I.css' }),
-    ]);
-    await page.waitForSelector('.ou-section-tabs-sub');
-    // The script replaces the course_home_content by module_nav.
-    const selectedLHSItem = await page.$('li.section a.active');
-    const selectedModuleName = await page.evaluate(selectedLHSItem => selectedLHSItem.textContent, selectedLHSItem);
-    await expect(selectedModuleName).toBe(moduleArray[0].name);
-  });
-
   it('Progress bar: Check module item footer exists, for the progress bar.', async () => {
     await page.goto(`${host}/courses/${courseObject.id}/modules/items/${moduleItems[0].id}`);
     const element = await page.$('#sequence_footer');
@@ -294,38 +225,6 @@ describe('Test the "Canvas Where Am I" most relevant theme integration items.', 
     await expect(page.url()).toBe(`${host}/courses/${courseObject.id}/modules/items/${moduleItems[1].id}`);
   });
 
-  it('Progress bar: Check progress bar is rendered after performing the script.', async () => {
-    await page.goto(`${host}/courses/${courseObject.id}/modules/items/${moduleItems[0].id}`);
-    await page.evaluate(() => ENV['FORCE_CPN'] = true);
-    await Promise.all([
-      page.addScriptTag({ path: './canvas-where-am-I.js' }),
-      page.addStyleTag({ path: './canvas-where-am-I.css' }),
-    ]);
-    // The progress bar is added to the footer.
-    const footerContainerSelector = '.ou-ColContainer';
-    await page.waitForSelector(footerContainerSelector);
-    const footerContainerElement = await page.$(footerContainerSelector);
-    await expect(footerContainerElement).not.toBeNull();
-    const progressBarItems = await page.$$('li.ou-progress-item');
-    await expect(progressBarItems.length).toBe(moduleItems.length);
-  });
-
-  it('Progress bar: Check the right item is selected in the progress bar.', async () => {
-    const randomModuleItem = getRandomModuleItem();
-    await page.goto(`${host}/courses/${courseObject.id}/modules/items/${randomModuleItem.id}`);
-    await page.evaluate(() => ENV['FORCE_CPN'] = true);
-    await Promise.all([
-      page.addScriptTag({ path: './canvas-where-am-I.js' }),
-      page.addStyleTag({ path: './canvas-where-am-I.css' }),
-    ]);
-    const footerContainerSelector = '.ou-ColContainer';
-    await page.waitForSelector(footerContainerSelector);
-    // Query the selected item and check it's the same moduleItem.
-    const selectedProgressBarItem = await page.$('li.ou-progress-item a.active');
-    const selectedModuleItemName = await (await selectedProgressBarItem.getProperty('title')).jsonValue();
-    await expect(selectedModuleItemName).toBe(randomModuleItem.title);
-  });
-
   it('Modules list: Check the data-module-id attribute exists.', async () => {
     const randomModule = getRandomModule();
     await page.goto(`${host}/courses/${courseObject.id}/modules`);
@@ -342,34 +241,6 @@ describe('Test the "Canvas Where Am I" most relevant theme integration items.', 
     const randomModule = getRandomModule();
     await page.goto(`${host}/courses/${courseObject.id}/modules/${randomModule.id}`);
     await expect(page.url()).toBe(`${host}/courses/${courseObject.id}/modules#module_${randomModule.id}`);
-  });
-
-  it('Modules list: Check the script does not perform changes to modules.', async () => {
-    await page.goto(`${host}/courses/${courseObject.id}/modules`);
-    await page.evaluate(() => ENV['FORCE_CPN'] = true);
-    await Promise.all([
-      page.addScriptTag({ path: './canvas-where-am-I.js' }),
-      page.addStyleTag({ path: './canvas-where-am-I.css' }),
-    ]);
-    const modulesSelector = 'div.context_module';
-    await page.waitForSelector(modulesSelector);
-    const modules = await page.$$(modulesSelector);
-    // We add one because Canvas also returns an extra blank module with id context_module_blank
-    await expect(modules.length).toBe(moduleArray.length + 1);
-  });
-
-  it('Modules list: Check the script filters the other modules when accessing a module.', async () => {
-    const randomModule = getRandomModule();
-    await page.goto(`${host}/courses/${courseObject.id}/modules/${randomModule.id}`);
-    await page.evaluate(() => ENV['FORCE_CPN'] = true);
-    await Promise.all([
-      page.addScriptTag({ path: './canvas-where-am-I.js' }),
-      page.addStyleTag({ path: './canvas-where-am-I.css' }),
-    ]);
-    const modulesSelector = 'div.context_module';
-    await page.waitForSelector(modulesSelector);
-    const modules = await page.$$(modulesSelector);
-    await expect(modules.length).toBe(1);
   });
 
 });
