@@ -100,8 +100,7 @@ describe('Test the CPN script logic with an empty course.', () => {
   });
 
   it('Tile View: Ensure the script does not perform any action in other course homes.', async () => {
-    // Replaces the course home by a different tool.
-    const courseUpdate = {default_view: 'feed'};
+    // Replaces the course home by the feed instead of modules.
     await axios({
       method: 'PUT',
       url: `${host}/api/v1/courses/${courseObject.id}`,
@@ -122,15 +121,6 @@ describe('Test the CPN script logic with an empty course.', () => {
     // Check the module_nav div does not exist
     const moduleNav = await page.$('#module_nav');
     await expect(moduleNav).toBeNull();
-  });
-
-  it('Modules submenu: Check the script does not make any changes in LHS menu.', async () => {
-    await goToCourse(page);
-    await appendCPNScript(page);
-    const modulesToolLink = await page.$$('li.section a.modules');
-    await expect(modulesToolLink).not.toBeNull();
-    const submenuElement = await page.$('.ou-section-tabs-sub');
-    await expect(submenuElement).toBeNull();
   });
 
   it('Modules submenu: Check the script does not make any changes in LHS menu.', async () => {

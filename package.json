@@ -4,7 +4,8 @@
   "description": "Theme .js and .css to add within course navigation to Instructure Canvas on the web",
   "main": "",
   "scripts": {
-    "test": "jest",
+    "test": "jest cpn-general.test.js cpn-current-script.test.js cpn-empty-course.test.js",
+    "test-deployed": "jest cpn-deployed-script.test.js",
     "start": "http-server -p 3001 -S -C localhost.pem -K localhost-key.pem",
     "minify": "minify canvas-where-am-I.js --out-file canvas-where-am-I.min.js --mangle.keepClassName && cleancss -o canvas-where-am-I.min.css canvas-where-am-I.css"
   },

@@ -24,8 +24,8 @@ integrations:
     - integrationName: email
       type: email
       recipients:
+        - acit-sys-apps@maillist.ox.ac.uk
         - miguel.pellicer@ctl.ox.ac.uk
-        # Replace Miguel by Oxford staff, ask Matthew about adding him or a different contact for Shippable notifications.
       on_success: change
       on_failure: change
       on_cancel: change
@@ -34,9 +34,21 @@ integrations:
   generic:
     - integrationName: canvas-where-am-i-github
 resources:
-  - name: course-presentation-navigation-repo
-    type: gitRepo
-    integration: github
-    pointer:
-      sourceName: oxctl/canvas-where-am-i
-      branch: master
+  - name: canvas-cpn-weekly-trigger
+    type: time
+    versionTemplate:
+      #interval: "0 0 * * MON"  # this field accepts cron like syntax
+      interval: "0 * * * *" # This is for testing purposes, test the automatic build every hour.
+
+jobs:
+  - name: canvas-cpn-weekly-tests
+    type: runSh
+    steps:
+      - IN: canvas-cpn-weekly-trigger
+      - TASK:
+          name: Unpack build artifact onto public S3 bucket
+          script:
+            - git clone https://github.com/oxctl/canvas-where-am-i
+            - cd canvas-where-am-i
+            - npm install
+            - npm run test-deployed
