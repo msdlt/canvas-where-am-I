@@ -173,19 +173,21 @@
       //no of columns per row of tiles at top of Modules page - 1, 2, 3, 4, 6 or 12 - ONLY USE 4 for the moment
       const noOfColumnsPerRow = 4;
 
-      /* colours for Module tiles mostly randomly selected from: https://www.ox.ac.uk/public-affairs/style-guide/digital-style-guide */
+      /* Colours for Module tiles mostly randomly selected from: https://www.ox.ac.uk/public-affairs/style-guide/digital-style-guide */
+      /* Some color are not accessible and replaced by variants using this service: https://accessible-colors.com/*/
       const moduleColours = [
-          '#e8ab1e','#91b2c6','#517f96','#1c4f68',
-          '#400b42','#293f11','#640D14','#b29295',
-          '#002147','#cf7a30','#a79d96','#aab300',
-          '#872434','#043946','#fb8113','#be0f34',
-          '#a1c4d0','#122f53','#0f7361','#3277ae',
-          '#44687d','#517fa4','#177770','#be0f34',
-          '#d34836','#70a9d6','#69913b','#d62a2a',
-          '#5f9baf','#09332b','#44687d','#721627',
-          '#9eceeb','#330d14','#006599','#cf7a30',
-          '#a79d96','#be0f34','#001c3d','#ac48bf',
-          '#9c4700','#c7302b','#ebc4cb','#1daced'
+        '#873597','#872434','#721627','#043946',
+        '#595959','#B10E31','#275D86','#333333',
+        '#09332b','#365E6C','#365D74','#8E4402',
+        '#330d14','#3D5D70','#00152e','#595D00',
+        '#63583E','#5F584F','#814C1E','#0B5F86',
+        '#353c47','#000000','#005E8F','#5D594C',
+        '#3B5C77','#1C5E86','#466127','#9B3547',
+        '#001c3d','#0D6454','#A82824','#914200',
+        '#5E5854','#002147','#615751','#6D5606',
+        '#A13223','#7a736e','#003947','#193658',
+        '#122f53','#635746','#13635E','#AC2121',
+        '#275C87'
       ];
 
       // Create our nav container
