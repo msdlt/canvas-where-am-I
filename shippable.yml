@@ -39,12 +39,16 @@ resources:
     versionTemplate:
       #interval: "0 0 * * MON"  # this field accepts cron like syntax
       interval: "0 * * * *" # This is for testing purposes, test the automatic build every hour.
+  - name: canvas-cpn-env-credentials
+    type: integration
+    integration: canvas-where-am-i-github
 
 jobs:
   - name: canvas-cpn-weekly-tests
     type: runSh
     steps:
       - IN: canvas-cpn-weekly-trigger
+      - IN: canvas-cpn-env-credentials
       - TASK:
           name: Unpack build artifact onto public S3 bucket
           script:
