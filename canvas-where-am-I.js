@@ -374,14 +374,13 @@
 
         moduleItemsForProgress.forEach(item => {
             let listItem = document.createElement('li');
-            let listItemLink = document.createElement('a');
             listItem.className = 'ou-progress-item';
+            let listItemLink = document.createElement('a');
             listItemLink.classList.add(item.icon);
             if (item.current) {
                 listItemLink.classList.add('active');
             }
             listItemLink.href = item.href;
-            listItemLink.setAttribute('role', 'menuitem');
             listItemLink.title = item.title;
             // Add the link to the item
             listItem.appendChild(listItemLink);
