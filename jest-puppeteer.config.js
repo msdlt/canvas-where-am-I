@@ -3,6 +3,10 @@ module.exports = {
     headless: true,
     // devtools: true,
     slowMo: 50,
+    args: [
+      '--no-sandbox',
+      '--disable-setuid-sandbox',
+    ]
   },
   // Don't error if there are console messages
   // At the moment Canvas has errors in the console on a course
