@@ -37,8 +37,8 @@ resources:
   - name: canvas-cpn-weekly-trigger
     type: time
     versionTemplate:
-      #interval: "0 0 * * MON"  # this field accepts cron like syntax
-      interval: "0 * * * *" # This is for testing purposes, test the automatic build every hour.
+      interval: "0 0 * * MON"  # this field accepts cron like syntax
+      # interval: "0 * * * *" # This is for testing purposes, test the automatic build every hour.
   - name: canvas-cpn-env-credentials
     type: integration
     integration: canvas-where-am-i-github
