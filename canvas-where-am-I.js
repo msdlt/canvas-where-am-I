@@ -5,7 +5,17 @@
     /****************************************/
 
     /* Amazon S3 bucket URL, this URL is needed to retrieve the course presentation and navigation settings */
-    const amazonS3bucketUrl = `https://oxctl-modules.s3-eu-west-1.amazonaws.com`;
+    let amazonS3bucketUrl = null;
+    switch (window.location.hostname) {
+      case 'canvas.ox.ac.uk':
+        amazonS3bucketUrl = 'https://oxctl-cpn-settings-prod.s3-eu-west-1.amazonaws.com';
+        break;
+      case 'oxeval.instructure.com':
+      case 'universityofoxford.beta.instructure.com':
+      default:
+        amazonS3bucketUrl = `https://oxctl-modules.s3-eu-west-1.amazonaws.com`;
+        break;
+    }
 
     /* DOM elements to check for */
     // The structure hierarchy in Canvas is content > course_home_content > context_modules_sortable_container
