@@ -20,7 +20,7 @@
   },
   "homepage": "https://github.com/oxctl/canvas-where-am-I#readme",
   "devDependencies": {
-    "axios": "^0.20.0",
+    "axios": "^0.21.1",
     "babel-minify": "^0.5.1",
     "clean-css-cli": "^4.3.0",
     "dotenv": "^8.2.0",
