@@ -1,6 +1,6 @@
-# This just builds pull requests to check that they are ok to go.
+# This is a regular integration test to check that our changes still work with Canvas.
 
-name: Frontend PR
+name: Integration Test
 
 env:
   NODE_VERSION: 14.13.0
