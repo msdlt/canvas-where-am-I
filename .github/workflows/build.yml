@@ -1,6 +1,6 @@
 # This is a regular integration test to check that our changes still work with Canvas.
 
-name: Integration Test
+name: Build and Test
 
 env:
   NODE_VERSION: 14.13.0
