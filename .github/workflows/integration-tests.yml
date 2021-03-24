@@ -1,0 +1,39 @@
+# This just builds pull requests to check that they are ok to go.
+
+name: Frontend PR
+
+env:
+  NODE_VERSION: 14.13.0
+  # These are the configurations for the tests
+  ACCOUNT_ID: ${{ secrets.ACCOUNT_ID }}
+  AMAZON_S3_BUCKET_URL: ${{ secrets.AMAZON_S3_BUCKET_URL }}
+  CANVAS_HOST: ${{ secrets.CANVAS_HOST }}
+  CANVAS_PRODUCTION_HOST: ${{ secrets.CANVAS_PRODUCTION_HOST }}
+  EMPTY_TEST_COURSE_ID: ${{ secrets.EMPTY_TEST_COURSE_ID }}
+  OAUTH_TOKEN: ${{ secrets.OAUTH_TOKEN }}
+  TEST_COURSE_ID: ${{ secrets.TEST_COURSE_ID }}
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 0 * * MON"
+
+jobs:
+  build:
+    runs-on: ubuntu-20.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v2
+      - name: Use Node.js ${{ env.NODE_VERSION }}
+        uses: actions/setup-node@v1
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+      - uses: actions/cache@v2
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
+      - run: npm install
+      - run: npm run test-deployed
+
