@@ -1,11 +1,13 @@
 # This just builds pull requests to check that they are ok to go.
 
-name: Frontend PR
+name: Build
 
 env:
   NODE_VERSION: 14.13.0
 
 on:
+  push:
+    branches: [ master ]
   pull_request:
     branches: [ master ]
     paths-ignore:
@@ -28,6 +30,5 @@ jobs:
           key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
           restore-keys: |
             ${{ runner.os }}-node-
-      - run: npm ci
-      - run: npm run build --if-present
+      - run: npm install
       - run: npm test
