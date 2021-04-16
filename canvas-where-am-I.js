@@ -4,17 +4,21 @@
     /**** Start of Configuration Section ****/
     /****************************************/
 
+    let amazonS3bucketUrl = '';
     /* Amazon S3 bucket URL, this URL is needed to retrieve the course presentation and navigation settings */
-    let amazonS3bucketUrl = null;
-    switch (window.location.hostname) {
-      case 'canvas.ox.ac.uk':
-        amazonS3bucketUrl = 'https://oxctl-cpn-settings-prod.s3-eu-west-1.amazonaws.com';
-        break;
-      case 'oxeval.instructure.com':
-      case 'universityofoxford.beta.instructure.com':
-      default:
-        amazonS3bucketUrl = `https://oxctl-modules.s3-eu-west-1.amazonaws.com`;
-        break;
+    // amazonS3bucketUrl = 'https://oxctl-cpn-config-dev.s3-eu-west-1.amazonaws.com'
+    // The production bucket
+    // amazonS3bucketUrl = 'https://oxctl-modules-settings-prod.s3-eu-west-1.amazonaws.com'
+    // The development bucket
+    amazonS3bucketUrl = 'https://oxctl-modules-dev.s3-eu-west-1.amazonaws.com'
+
+    /****************************************/
+    /**** End of Configuration Section ****/
+    /****************************************/
+
+    if (!amazonS3bucketUrl) {
+        console.error("No AWS S3 bucket URL set, not processing.");
+        return;
     }
 
     /* DOM elements to check for */
@@ -49,14 +53,14 @@
     }
 
     // If the FORCE_CPN variable is appended to the ENV object, bypass the S3 bucket check and enable the feature for the course.
-    const isTileViewEnabled = ENV.FORCE_CPN || await ou_CheckSettings(initDomainId, initCourseId);
+    const settings = (ENV.FORCE_CPN?{homepage: true, enhancements: true}:false) || await ou_CheckSettings(initDomainId, initCourseId);
     // Only perform the course presentation and navigation logic if it is enabled in the course CPN settings.
-    if (!isTileViewEnabled) {
+    if (!settings.homepage && !settings.enhancements) {
       return;
     }
 
     // We're inside a specific modules, hide the other Modules
-    if (initModuleId) {
+    if (initModuleId && settings.enhancements) {
         ou_removeOtherModules(initModuleId);
     }
 
@@ -69,7 +73,7 @@
 
     const isCourseHome = divContextModulesContainer && !initModuleId && divCourseHomeContent;
     // If the user is in the course home and contains modules, replace the standard view by the tile view.
-    if (isCourseHome) {
+    if (isCourseHome && settings.homepage) {
       // Remove the current home content instead of hiding it.
       divCourseHomeContent.remove();
       const tileViewDiv = ou_buildModulesTileView(initCourseId, courseModules);
@@ -78,13 +82,13 @@
     }
 
     // Add the submenu of modules to the LHS menu if the modules list item is visible.
-    if (lhsModulesListItem) {
+    if (lhsModulesListItem && settings.enhancements) {
       const moduleSubmenuList = ou_buildModulesSubmenu(initCourseId, courseModules, initModuleId, initModuleItemId);
       // Append the module list to the modules tool item in the LHS menu.
       lhsModulesListItem.appendChild(moduleSubmenuList);
     }
 
-    if (initModuleItemId) {
+    if (initModuleItemId && settings.enhancements) {
       // The footer and navigation buttons are rendered by JS and sometimes this happens before they are rendered, wait until gets a value.
       const sequenceFooterId = '.module-sequence-footer-content';
       let divFooterContent = document.querySelector(sequenceFooterId);
@@ -122,18 +126,23 @@
      */
     async function ou_CheckSettings(domainId, courseId) {
       const settingsFileRequestUrl = `${amazonS3bucketUrl}/${domainId}/${courseId}.json`;
-      const isTileViewEnabled = await fetch(settingsFileRequestUrl)
-        .then(ou_json)
-        .then(function(json) {
-            const isTileViewEnabled = json['modules-navigation'];
-            console.log('Modules Navigation Enabled: ' + isTileViewEnabled);
-            return isTileViewEnabled;
-        })
-        .catch(function(error) {
-            console.log('Failed to load settings');
-            return false;
-        });
-        return isTileViewEnabled;
+        return await fetch(settingsFileRequestUrl)
+            .then(ou_json)
+            .then(function (json) {
+                const isTileViewEnabled = json['modules-navigation'];
+                if (isTileViewEnabled) {
+                    // This is the old setting that we still support, from before we split the options.
+                    return {homepage: true, enhancements: true}
+                }
+                return {
+                    homepage: json['modules-homepage'],
+                    enhancements: json['modules-enhancements']
+                }
+            })
+            .catch(function (error) {
+                console.log('Failed to load settings: '+ error.message);
+                return {homepage: false, enhancements: false};
+            });
     }
 
     /*
@@ -143,36 +152,35 @@
     async function ou_getModules(courseId, pageUrl) {
       // The module API is pageable so it needs to be iterative.
       const moduleRequest = !pageUrl ? `/api/v1/courses/${courseId}/modules?include=items&per_page=100` : pageUrl;
-      let courseModules = await fetch(moduleRequest, {
-        method: 'GET',
-        credentials: 'include',
-        headers: {
-          'Accept': 'application/json',
-        }
+        return await fetch(moduleRequest, {
+          method: 'GET',
+          credentials: 'include',
+          headers: {
+              'Accept': 'application/json',
+          }
       }).then(ou_status)
-      .then(async response => {
-        let modulePage = await response.json();
-        // As the API is pageable, we need to get the modules for each page.
-        // Gets the link header.
-        const linkHeader = response.headers.get('link');
-        // As we do not use external libraries, we get the next page manually.
-        const parts = linkHeader.split(',');
-        const nextPage = parts.find(part => part.includes('rel="next"'));
-        if (nextPage) {
-          // Remove the control characters to get the URL.
-          const nextPageUrl = nextPage.replace('>; rel="next"', '').replace('<','');
-          // Get the modules of the next page recursively and add them to the module list.
-          const nextPageModules = await ou_getModules(courseId, nextPageUrl);
-          modulePage = modulePage.concat(nextPageModules);
-        }
-        // We only return the modules when is the last page, there is no next page.
-        return modulePage;
-      })
-      .catch(function(error) {
-        console.log('Failed to get course modules', error);
-        return [];
-      });
-      return courseModules;
+          .then(async response => {
+              let modulePage = await response.json();
+              // As the API is pageable, we need to get the modules for each page.
+              // Gets the link header.
+              const linkHeader = response.headers.get('link');
+              // As we do not use external libraries, we get the next page manually.
+              const parts = linkHeader.split(',');
+              const nextPage = parts.find(part => part.includes('rel="next"'));
+              if (nextPage) {
+                  // Remove the control characters to get the URL.
+                  const nextPageUrl = nextPage.replace('>; rel="next"', '').replace('<', '');
+                  // Get the modules of the next page recursively and add them to the module list.
+                  const nextPageModules = await ou_getModules(courseId, nextPageUrl);
+                  modulePage = modulePage.concat(nextPageModules);
+              }
+              // We only return the modules when is the last page, there is no next page.
+              return modulePage;
+          })
+          .catch(function (error) {
+              console.log('Failed to get course modules', error);
+              return [];
+          });
     }
 
     /*
@@ -273,7 +281,7 @@
       let moduleSubmenuList = document.createElement('ul');
       moduleSubmenuList.className = 'ou-section-tabs-sub';
 
-      moduleArray.forEach((module, mindex) => {
+      moduleArray.forEach((module) => {
         // Create a new item for the submodule list.
         let newItem = document.createElement('li');
         newItem.className = 'ou-section-sub';
