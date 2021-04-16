@@ -52,12 +52,32 @@
       return;
     }
 
+    // Allow us to flush the cache when asked
+    window.addEventListener("message", function (event) {
+        // We don't care about the origin as there's no security risk
+        if (event.data === 'uk.ac.ox.cpn.flush') {
+            sessionStorage.setItem('uk.ac.ox.cpn.flush', 'true');
+        }
+    });
+
+    const noCache = sessionStorage.getItem('uk.ac.ox.cpn.flush') === 'true';
+
     // If the FORCE_CPN variable is appended to the ENV object, bypass the S3 bucket check and enable the feature for the course.
-    const settings = (ENV.FORCE_CPN?{homepage: true, enhancements: true}:false) || await ou_CheckSettings(initDomainId, initCourseId);
+    const settings = (ENV.FORCE_CPN?{homepage: true, enhancements: true}:false) || await ou_CheckSettings(initDomainId, initCourseId, noCache);
+
     // Only perform the course presentation and navigation logic if it is enabled in the course CPN settings.
-    if (!settings.homepage && !settings.enhancements) {
-      return;
+    if ((!settings.homepage && !settings.enhancements)) {
+        // We have to put this after testing the results of the settings object as otherwise it appears that the
+        // optimiser seems to not wait for the completion of the request. This is also why the value is different
+        // from the alternative path as in Firefox we were seeing it be executed out of order although I can't verify
+        // that this is actually what's happening.
+        sessionStorage.setItem('uk.ac.ox.cpn.flush', 'false-not-enabled')
+        return;
     }
+
+    // We have to put this after testing the results of the settings object as otherwise it appears that the
+    // optimiser seems to not wait for the completion of the request.
+    sessionStorage.setItem('uk.ac.ox.cpn.flush', 'false-enabled')
 
     // We're inside a specific modules, hide the other Modules
     if (initModuleId && settings.enhancements) {
@@ -124,9 +144,10 @@
     /*
      * Checks if the CPN view is enabled requesting the CPN settings from the Amazon S3 bucket.
      */
-    async function ou_CheckSettings(domainId, courseId) {
+    async function ou_CheckSettings(domainId, courseId, noCache) {
+      const options = (noCache)?{cache: 'no-cache'}:{};
       const settingsFileRequestUrl = `${amazonS3bucketUrl}/${domainId}/${courseId}.json`;
-        return await fetch(settingsFileRequestUrl)
+        return await fetch(settingsFileRequestUrl, options)
             .then(ou_json)
             .then(function (json) {
                 const isTileViewEnabled = json['modules-navigation'];
