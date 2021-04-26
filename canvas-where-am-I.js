@@ -8,9 +8,9 @@
     /* Amazon S3 bucket URL, this URL is needed to retrieve the course presentation and navigation settings */
     // amazonS3bucketUrl = 'https://oxctl-cpn-config-dev.s3-eu-west-1.amazonaws.com'
     // The production bucket
-    // amazonS3bucketUrl = 'https://oxctl-modules-settings-prod.s3-eu-west-1.amazonaws.com'
+    // amazonS3bucketUrl = 'https://oxctl-cpn-config-prod.s3-eu-west-1.amazonaws.com'
     // The development bucket
-    amazonS3bucketUrl = 'https://oxctl-modules-dev.s3-eu-west-1.amazonaws.com'
+    // amazonS3bucketUrl = 'https://oxctl-modules-dev.s3-eu-west-1.amazonaws.com'
 
     /****************************************/
     /**** End of Configuration Section ****/
